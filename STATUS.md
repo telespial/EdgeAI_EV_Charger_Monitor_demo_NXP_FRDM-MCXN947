@@ -9,4 +9,6 @@ State: initialized
 - Build/flash workflow scripts and MCUX SDK overlay are in place.
 - Firmware source currently provides baseline console bring-up.
 - Added cockpit-style gauge theme preset (`cockpit_dark_v1`) and documentation.
+- Added replay/live-override data source abstraction for gauge testing.
+- Added CSV-to-header conversion flow for editable test traces.
 - EV charger monitoring logic and on-screen gauge rendering remain to be implemented.
