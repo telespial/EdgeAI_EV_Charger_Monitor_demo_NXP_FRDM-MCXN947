@@ -48,3 +48,7 @@ Format:
 - 2026-02-14 16:39:21 | source tools/mcux_env.sh && west build ... build_ev_charger_try3 | compile updated dashboard firmware
 - 2026-02-14 16:39:21 | WS_DIR=... BUILD_DIR=... ./tools/flash_frdmmcxn947.sh | flash cockpit-dashboard update to FRDM-MCXN947
 - 2026-02-14 16:39:21 | update docs/PROJECT_STATE.md STATUS.md docs/COMMAND_LOG.md | record UI redesign/build/flash changes
+- 2026-02-14 17:03:44 | patch src/gauge_render.c | implement 3-quadrant layout with gauges in left/middle and scope+terminal in right quadrant
+- 2026-02-14 17:03:44 | source tools/mcux_env.sh + install_mcux_overlay.sh + west build | compile quadrant dashboard update
+- 2026-02-14 17:03:44 | WS_DIR=... BUILD_DIR=... ./tools/flash_frdmmcxn947.sh | flash quadrant dashboard update to FRDM-MCXN947
+- 2026-02-14 17:03:44 | update docs/PROJECT_STATE.md STATUS.md docs/COMMAND_LOG.md | record quadrant-layout and status-terminal changes

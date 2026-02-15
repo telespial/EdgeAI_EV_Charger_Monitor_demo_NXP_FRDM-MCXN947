@@ -23,3 +23,6 @@ State: initialized
 - Dashboard UI upgraded to a professional cockpit-style cluster layout (center + dual side gauges).
 - Added oscilloscope panel (upper-right) with white/red timelines and yellow 20 Hz signal trace labeling.
 - Firmware rebuilt and reflashed after style update.
+- LCD layout now uses 3 vertical quadrants with gauge cluster in left/middle and scope + status terminal in right quadrant.
+- Added lower-right text terminal block showing CPU usage, AI status, mode, temp, SOC, current, and power.
+- Rebuilt and reflashed firmware after quadrant layout update.

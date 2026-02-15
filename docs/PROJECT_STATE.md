@@ -110,3 +110,12 @@ Project: `EdgeAI_EV_Charger_Monitor_demo_NXP_FRDM-MCXN947`
   - yellow signal trace and `20HZ TRACE` label
 - Added missing uppercase `Z` glyph in `src/text5x7.c` for dashboard labeling.
 - Rebuilt and flashed `build_ev_charger_try3`; flash completed successfully on probe `#1`.
+
+## Update 2026-02-15
+- Reworked the LCD UI into three vertical quadrants:
+  - Quadrant 1: primary voltage/SOC gauge
+  - Quadrant 2: current and power gauges
+  - Quadrant 3 (top): oscilloscope panel
+  - Quadrant 3 (bottom): text terminal status panel
+- Added terminal telemetry text in lower-right panel: CPU %, AI state, mode, temperature, SOC, current, and power.
+- Rebuilt and flashed successfully to FRDM-MCXN947 using LinkServer probe `#1`.
