@@ -59,3 +59,6 @@ State: initialized
 - Firmware rebuilt and reflashed after layout adjustment.
 - Lower-left horizontal guide line segments shortened to avoid lower gauge/`POWER` text overlap.
 - Firmware rebuilt and reflashed after line-length adjustment.
+- `CURRENT` label moved below upper gauge at the same relative distance as `POWER` below lower gauge.
+- Added corresponding upper horizontal guide line to match lower `POWER` treatment.
+- Firmware rebuilt and reflashed after label/line symmetry update.

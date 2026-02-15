@@ -200,3 +200,8 @@ Project: `EdgeAI_EV_Charger_Monitor_demo_NXP_FRDM-MCXN947`
 ## Update 2026-02-15
 - Shortened lower-left guide lines so they no longer overlay the `POWER` text or intrude into the lower gauge area.
 - Rebuilt and flashed successfully to FRDM-MCXN947.
+
+## Update 2026-02-15
+- Moved upper gauge `CURRENT` label downward to match the lower `POWER` label offset style.
+- Added matching short horizontal guide line near the upper label for visual symmetry.
+- Rebuilt and flashed successfully to FRDM-MCXN947.

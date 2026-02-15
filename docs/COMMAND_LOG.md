@@ -104,3 +104,7 @@ Format:
 - 2026-02-14 17:37:09 | source tools/mcux_env.sh + install_mcux_overlay.sh + west build | compile guide-line length adjustment
 - 2026-02-14 17:37:09 | WS_DIR=... BUILD_DIR=... ./tools/flash_frdmmcxn947.sh | flash guide-line length adjustment
 - 2026-02-14 17:37:09 | update docs/PROJECT_STATE.md STATUS.md docs/COMMAND_LOG.md | record guide-line overlap fix
+- 2026-02-14 17:38:27 | patch src/gauge_render.c | move CURRENT label down to match POWER offset and add matching upper horizontal line
+- 2026-02-14 17:38:27 | source tools/mcux_env.sh + install_mcux_overlay.sh + west build | compile upper-label/line symmetry update
+- 2026-02-14 17:38:27 | WS_DIR=... BUILD_DIR=... ./tools/flash_frdmmcxn947.sh | flash upper-label/line symmetry update
+- 2026-02-14 17:38:27 | update docs/PROJECT_STATE.md STATUS.md docs/COMMAND_LOG.md | record CURRENT/POWER symmetry change
