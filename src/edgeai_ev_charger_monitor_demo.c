@@ -12,6 +12,7 @@ int main(void)
 {
     uint32_t print_divider = 0u;
     bool lcd_ok;
+    const power_sample_t *s;
 
     BOARD_InitBootPins();
     BOARD_InitBootClocks();
@@ -24,24 +25,28 @@ int main(void)
     PRINTF("Gauge render: %s\r\n", lcd_ok ? "ready" : "init_failed");
     PRINTF("Power data source: %s\r\n", PowerData_ModeName());
 
+    s = PowerData_Get();
+    if (lcd_ok)
+    {
+        GaugeRender_DrawFrame(s);
+    }
+
     for (;;)
     {
-        const power_sample_t *s;
-
         PowerData_Tick();
-
-        print_divider++;
-        if (print_divider < 120000u)
-        {
-            continue;
-        }
-        print_divider = 0u;
-
         s = PowerData_Get();
+
         if (lcd_ok)
         {
             GaugeRender_DrawFrame(s);
         }
+
+        print_divider++;
+        if (print_divider < 200000u)
+        {
+            continue;
+        }
+        print_divider = 0u;
         PRINTF("SAMPLE,mA=%u,mW=%u,mV=%u,SOC=%u,T=%u,mode=%s\r\n",
                s->current_mA,
                s->power_mW,

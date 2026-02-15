@@ -20,3 +20,6 @@ Format:
 - 2026-02-14 16:10:02 | install overlay + west build using shared sphere workspace | produce build_ev_charger_try3 binary
 - 2026-02-14 16:10:02 | WS_DIR=... BUILD_DIR=... ./tools/flash_frdmmcxn947.sh | flash validated on FRDM-MCXN947 probe #1
 - 2026-02-14 16:10:02 | update STATUS/PROJECT_STATE/TODO/BUILD_FLASH docs | record renderer and known-good build/flash path
+- 2026-02-14 16:11:49 | patch src/edgeai_ev_charger_monitor_demo.c render cadence | fix blank-screen issue by drawing every loop
+- 2026-02-14 16:11:49 | rebuild in shared workspace build_ev_charger_try3 | verify compile after render-loop fix
+- 2026-02-14 16:11:49 | flash build_ev_charger_try3 via LinkServer probe #1 | deploy blank-screen fix firmware

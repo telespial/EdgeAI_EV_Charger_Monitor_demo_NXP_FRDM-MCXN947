@@ -48,3 +48,8 @@ Project: `EdgeAI_EV_Charger_Monitor_demo_NXP_FRDM-MCXN947`
 - Build succeeded and flash completed via:
   - workspace: `.../EdgeAI_sphere_demo.../mcuxsdk_ws`
   - build dir: `build_ev_charger_try3`
+
+## Update 2026-02-15
+- Fixed a render cadence bug that could appear as a blank screen.
+- `src/edgeai_ev_charger_monitor_demo.c` now draws the gauge frame every loop iteration.
+- Rebuilt and reflashed `build_ev_charger_try3` after the fix.
