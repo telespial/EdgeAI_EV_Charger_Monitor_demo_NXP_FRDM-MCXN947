@@ -1,4 +1,5 @@
 #include <stdbool.h>
+#include <stdint.h>
 #include <string.h>
 
 #include "app.h"
@@ -7,34 +8,56 @@
 #include "fsl_common.h"
 #include "fsl_debug_console.h"
 #include "fsl_gt911.h"
-#include "fsl_gpio.h"
 #include "fsl_lpi2c.h"
 #include "fsl_port.h"
 #include "gauge_render.h"
-#include "gauge_style.h"
 #include "power_data_source.h"
 
-#define POWER_SAMPLE_PERIOD_US 50000u
 #define TOUCH_I2C LPI2C2
 #define TOUCH_I2C_FLEXCOMM_INDEX 2u
-#define TOUCH_I2C_BAUDRATE_HZ 400000u
 #define TOUCH_POINTS 5u
-#define TOUCH_INT_GPIO GPIO4
 #define TOUCH_INT_PORT PORT4
 #define TOUCH_INT_PIN 6u
-#define TOUCH_DEBOUNCE_TICKS 4u
-#define TOUCH_RELEASE_TICKS 2u
-#define TOUCH_HIT_PAD_X 30
-#define TOUCH_HIT_PAD_Y 40
-#define LCD_WIDTH 480
-#define LCD_HEIGHT 320
+
+#define TOUCH_POLL_DELAY_US 10000u
+#define POWER_TICK_PERIOD_US 50000u
+#define DISPLAY_REFRESH_PERIOD_US 500000u
 
 static gt911_handle_t s_touch_handle;
 static bool s_touch_ready = false;
+static bool s_touch_was_down = false;
+static bool s_touch_i2c_inited = false;
 
 static void TouchDelayMs(uint32_t delay_ms)
 {
-    SDK_DelayAtLeastUs(delay_ms * 1000u, CLOCK_GetCoreSysClkFreq());
+    SDK_DelayAtLeastUs(delay_ms * 1000u, SDK_DEVICE_MAXIMUM_CPU_CLOCK_FREQUENCY);
+}
+
+static bool TouchI2CInit(void)
+{
+    uint32_t src_hz;
+    lpi2c_master_config_t cfg;
+
+    if (s_touch_i2c_inited)
+    {
+        return true;
+    }
+
+    CLOCK_SetClkDiv(kCLOCK_DivFlexcom2Clk, 1u);
+    CLOCK_AttachClk(kFRO12M_to_FLEXCOMM2);
+
+    src_hz = CLOCK_GetLPFlexCommClkFreq(TOUCH_I2C_FLEXCOMM_INDEX);
+    if (src_hz == 0u)
+    {
+        PRINTF("TOUCH i2c init failed: FC2 clock=0\r\n");
+        return false;
+    }
+
+    LPI2C_MasterGetDefaultConfig(&cfg);
+    cfg.baudRate_Hz = 400000u;
+    LPI2C_MasterInit(TOUCH_I2C, &cfg, src_hz);
+    s_touch_i2c_inited = true;
+    return true;
 }
 
 static status_t TouchI2CSend(uint8_t deviceAddress,
@@ -75,6 +98,8 @@ static status_t TouchI2CReceive(uint8_t deviceAddress,
 
 static void TouchConfigIntPin(gt911_int_pin_mode_t mode)
 {
+    CLOCK_EnableClock(kCLOCK_Port4);
+
     port_pin_config_t cfg = {
         .pullSelect = kPORT_PullDown,
         .pullValueSelect = kPORT_LowPullResistor,
@@ -116,7 +141,6 @@ static void TouchConfigResetPin(bool pullUp)
 
 static void TouchInit(void)
 {
-    lpi2c_master_config_t i2c_cfg;
     gt911_config_t touch_cfg = {
         .I2C_SendFunc = TouchI2CSend,
         .I2C_ReceiveFunc = TouchI2CReceive,
@@ -127,20 +151,18 @@ static void TouchInit(void)
         .i2cAddrMode = kGT911_I2cAddrAny,
         .intTrigMode = kGT911_IntFallingEdge,
     };
-    const uint32_t i2c_src_hz = CLOCK_GetLPFlexCommClkFreq(TOUCH_I2C_FLEXCOMM_INDEX);
+    status_t st;
 
     s_touch_ready = false;
-    if (i2c_src_hz == 0u)
+    s_touch_was_down = false;
+
+    if (!TouchI2CInit())
     {
-        PRINTF("TOUCH init failed: FC%u clock=0\r\n", TOUCH_I2C_FLEXCOMM_INDEX);
         return;
     }
 
-    LPI2C_MasterGetDefaultConfig(&i2c_cfg);
-    i2c_cfg.baudRate_Hz = TOUCH_I2C_BAUDRATE_HZ;
-    LPI2C_MasterInit(TOUCH_I2C, &i2c_cfg, i2c_src_hz);
-
-    if (GT911_Init(&s_touch_handle, &touch_cfg) == kStatus_Success)
+    st = GT911_Init(&s_touch_handle, &touch_cfg);
+    if (st == kStatus_Success)
     {
         s_touch_ready = true;
         PRINTF("TOUCH ready: GT911 (%u x %u)\r\n",
@@ -149,7 +171,7 @@ static void TouchInit(void)
     }
     else
     {
-        PRINTF("TOUCH init failed: GT911\r\n");
+        PRINTF("TOUCH init failed: GT911 status=%d\r\n", (int)st);
     }
 }
 
@@ -180,6 +202,7 @@ static bool TouchGetPoint(int32_t *x_out, int32_t *y_out)
             break;
         }
     }
+
     if (selected == NULL)
     {
         for (uint8_t i = 0u; i < point_count; i++)
@@ -191,183 +214,96 @@ static bool TouchGetPoint(int32_t *x_out, int32_t *y_out)
             }
         }
     }
+
     if (selected == NULL)
     {
         return false;
     }
 
-    res_x = (s_touch_handle.resolutionX > 0u) ? (int32_t)s_touch_handle.resolutionX : LCD_WIDTH;
+    res_x = (s_touch_handle.resolutionX > 0u) ? (int32_t)s_touch_handle.resolutionX : 480;
     x = (int32_t)selected->y;
     y = res_x - (int32_t)selected->x;
-    if (x < 0)
-    {
-        x = 0;
-    }
-    if (x >= LCD_WIDTH)
-    {
-        x = LCD_WIDTH - 1;
-    }
-    if (y < 0)
-    {
-        y = 0;
-    }
-    if (y >= LCD_HEIGHT)
-    {
-        y = LCD_HEIGHT - 1;
-    }
+
+    if (x < 0) x = 0;
+    if (x > 479) x = 479;
+    if (y < 0) y = 0;
+    if (y > 319) y = 319;
 
     *x_out = x;
     *y_out = y;
     return true;
 }
 
-static bool TouchInAiPillHitbox(int32_t x, int32_t y)
+static bool TouchInAiPill(int32_t x, int32_t y)
 {
-    const int32_t x0 = (int32_t)GAUGE_RENDER_AI_PILL_X0 - TOUCH_HIT_PAD_X;
-    const int32_t y0 = (int32_t)GAUGE_RENDER_AI_PILL_Y0 - TOUCH_HIT_PAD_Y;
-    const int32_t x1 = (int32_t)GAUGE_RENDER_AI_PILL_X1 + TOUCH_HIT_PAD_X;
-    const int32_t y1 = (int32_t)GAUGE_RENDER_AI_PILL_Y1 + TOUCH_HIT_PAD_Y;
-    return (x >= x0) && (x <= x1) && (y >= y0) && (y <= y1);
-}
-
-static bool TouchInAiPillAnyOrientation(int32_t x, int32_t y)
-{
-    const int32_t max_x = LCD_WIDTH - 1;
-    const int32_t max_y = LCD_HEIGHT - 1;
-    const int32_t cands[8][2] = {
-        {x, y},
-        {y, x},
-        {max_x - x, y},
-        {x, max_y - y},
-        {max_x - x, max_y - y},
-        {max_x - y, max_y - x},
-        {y, max_y - x},
-        {max_x - y, x},
-    };
-    for (uint32_t i = 0u; i < 8u; i++)
-    {
-        if (TouchInAiPillHitbox(cands[i][0], cands[i][1]))
-        {
-            return true;
-        }
-    }
-    return false;
+    return (x >= GAUGE_RENDER_AI_PILL_X0) && (x <= GAUGE_RENDER_AI_PILL_X1) &&
+           (y >= GAUGE_RENDER_AI_PILL_Y0) && (y <= GAUGE_RENDER_AI_PILL_Y1);
 }
 
 int main(void)
 {
-    uint32_t print_divider = 0u;
-    uint32_t touch_debounce = 0u;
-    uint32_t touch_release_ticks = 0u;
     bool ai_enabled = true;
-    bool ai_touch_armed = true;
-    bool touch_int_prev_low = false;
     bool lcd_ok;
-    const power_sample_t *s;
-    power_sample_t last_drawn_sample;
-    bool last_drawn_ai_enabled = true;
-    bool has_last = false;
-    gpio_pin_config_t input_cfg = {kGPIO_DigitalInput, 1u};
+    uint32_t data_tick_accum_us = 0u;
+    uint32_t render_tick_accum_us = 0u;
+    const power_sample_t *sample;
 
     BOARD_InitHardware();
-    GPIO_PinInit(TOUCH_INT_GPIO, TOUCH_INT_PIN, &input_cfg);
-    TouchInit();
 
-    PRINTF("EV Charger Monitor demo baseline booted\r\n");
-    GaugeStyle_LogPreset();
-    PowerData_Init();
     lcd_ok = GaugeRender_Init();
-    PRINTF("Gauge render: %s\r\n", lcd_ok ? "ready" : "init_failed");
-    PRINTF("Power data source: %s\r\n", PowerData_ModeName());
+    PRINTF("EV dash LCD: %s\r\n", lcd_ok ? "ready" : "init_failed");
 
-    s = PowerData_Get();
-    if (lcd_ok)
+    PowerData_Init();
+    TouchInit();
+    PowerData_SetReplayHour(GaugeRender_GetTimelineHour());
+
+    sample = PowerData_Get();
+    if (lcd_ok && (sample != NULL))
     {
-        GaugeRender_DrawFrame(s, ai_enabled);
-        last_drawn_sample = *s;
-        last_drawn_ai_enabled = ai_enabled;
-        has_last = true;
+        GaugeRender_DrawFrame(sample, ai_enabled);
     }
+
+    PRINTF("EV dash app ready\r\n");
 
     for (;;)
     {
-        bool touch_down;
-        bool touch_int_low;
-        bool in_ai_pill = false;
         int32_t tx = 0;
         int32_t ty = 0;
+        bool pressed = TouchGetPoint(&tx, &ty);
+        bool in_pill = pressed && TouchInAiPill(tx, ty);
+        bool timeline_changed = GaugeRender_HandleTouch(tx, ty, pressed);
 
-        PowerData_Tick();
-        s = PowerData_Get();
-
-        touch_down = TouchGetPoint(&tx, &ty);
-        touch_int_low = (GPIO_PinRead(TOUCH_INT_GPIO, TOUCH_INT_PIN) == 0u);
-        if (touch_down)
-        {
-            in_ai_pill = TouchInAiPillAnyOrientation(tx, ty);
-            touch_release_ticks = 0u;
-        }
-        else if (touch_int_low && !touch_int_prev_low)
-        {
-            /* Fallback: use touch INT falling edge as a single tap event. */
-            touch_down = true;
-            in_ai_pill = true;
-            touch_release_ticks = 0u;
-        }
-        touch_int_prev_low = touch_int_low;
-
-        if ((touch_debounce == 0u) && ai_touch_armed && in_ai_pill)
+        if (in_pill && !s_touch_was_down)
         {
             ai_enabled = !ai_enabled;
-            touch_debounce = TOUCH_DEBOUNCE_TICKS;
-            ai_touch_armed = false;
-            PRINTF("AI_TOGGLE,%s,src=touch_gt911\r\n", ai_enabled ? "ON" : "OFF");
-        }
-
-        if (!touch_down)
-        {
-            if (touch_release_ticks < TOUCH_RELEASE_TICKS)
+            PRINTF("AI_TOGGLE,%s\r\n", ai_enabled ? "ON" : "OFF");
+            if (lcd_ok)
             {
-                touch_release_ticks++;
-            }
-            if (touch_release_ticks >= TOUCH_RELEASE_TICKS)
-            {
-                ai_touch_armed = true;
+                GaugeRender_DrawFrame(PowerData_Get(), ai_enabled);
             }
         }
-
-        if (touch_debounce > 0u)
+        if (timeline_changed && lcd_ok)
         {
-            touch_debounce--;
+            PowerData_SetReplayHour(GaugeRender_GetTimelineHour());
+            GaugeRender_DrawFrame(PowerData_Get(), ai_enabled);
+        }
+        s_touch_was_down = pressed;
+
+        data_tick_accum_us += TOUCH_POLL_DELAY_US;
+        render_tick_accum_us += TOUCH_POLL_DELAY_US;
+
+        if (data_tick_accum_us >= POWER_TICK_PERIOD_US)
+        {
+            data_tick_accum_us = 0u;
+            PowerData_Tick();
         }
 
-        if (lcd_ok &&
-            (!has_last || memcmp(s, &last_drawn_sample, sizeof(last_drawn_sample)) != 0 || (ai_enabled != last_drawn_ai_enabled)))
+        if (lcd_ok && (render_tick_accum_us >= DISPLAY_REFRESH_PERIOD_US))
         {
-            GaugeRender_DrawFrame(s, ai_enabled);
-            last_drawn_sample = *s;
-            last_drawn_ai_enabled = ai_enabled;
-            has_last = true;
+            render_tick_accum_us = 0u;
+            GaugeRender_DrawFrame(PowerData_Get(), ai_enabled);
         }
 
-        print_divider++;
-        if (print_divider >= 20u)
-        {
-            print_divider = 0u;
-            PRINTF("SAMPLE,mA=%u,mW=%u,mV=%u,SOC=%u,T=%u,ANOM=%u,WEAR=%u,ST=%u,TRISK=%u,sim_s=%u,mode=%s\r\n",
-                   s->current_mA,
-                   s->power_mW,
-                   s->voltage_mV,
-                   s->soc_pct,
-                   s->temp_c,
-                   s->anomaly_score_pct,
-                   s->connector_wear_pct,
-                   s->ai_status,
-                   s->thermal_risk_s,
-                   (unsigned int)s->elapsed_charge_sim_s,
-                   PowerData_ModeName());
-        }
-
-        SDK_DelayAtLeastUs(POWER_SAMPLE_PERIOD_US, CLOCK_GetCoreSysClkFreq());
+        SDK_DelayAtLeastUs(TOUCH_POLL_DELAY_US, CLOCK_GetCoreSysClkFreq());
     }
 }

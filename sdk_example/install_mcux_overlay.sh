@@ -17,6 +17,8 @@ if [[ ! -d "$MCUX_EXAMPLES_DIR" ]]; then
 fi
 
 mkdir -p "$MCUX_EXAMPLES_DIR/demo_apps" "$MCUX_EXAMPLES_DIR/_boards/frdmmcxn947/demo_apps"
+rm -rf "$MCUX_EXAMPLES_DIR/demo_apps/edgeai_ev_charger_monitor_demo"
+rm -rf "$MCUX_EXAMPLES_DIR/_boards/frdmmcxn947/demo_apps/edgeai_ev_charger_monitor_demo"
 cp -a "$OVERLAY_DIR/demo_apps/edgeai_ev_charger_monitor_demo" "$MCUX_EXAMPLES_DIR/demo_apps/"
 cp -a "$OVERLAY_DIR/_boards/frdmmcxn947/demo_apps/edgeai_ev_charger_monitor_demo" "$MCUX_EXAMPLES_DIR/_boards/frdmmcxn947/demo_apps/"
 

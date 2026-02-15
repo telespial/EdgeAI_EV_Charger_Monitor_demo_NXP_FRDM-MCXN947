@@ -1,10 +1,11 @@
 #include "power_data_source.h"
 
-#include "replay_trace_generated.h"
-
 #define POWER_SAMPLE_PERIOD_MS 50u
 #define POWER_SIM_TIME_SCALE 60u
 #define POWER_TEMP_HISTORY_LEN 20u
+#define REPLAY_CYCLE_HOURS 12u
+#define REPLAY_CYCLE_SECONDS (REPLAY_CYCLE_HOURS * 3600u)
+#define REPLAY_CYCLE_TICKS ((REPLAY_CYCLE_SECONDS * 1000u) / POWER_SAMPLE_PERIOD_MS)
 
 typedef struct
 {
@@ -32,9 +33,19 @@ typedef struct
     bool temp_hist_ready;
 
     uint16_t status_hold_ticks;
+    bool replay_hour_lock;
+    uint32_t replay_hour_start_tick;
+    uint32_t replay_hour_end_tick;
 } power_data_state_t;
 
 static power_data_state_t gPowerData;
+
+#define HOUR_TICKS ((3600u * 1000u) / POWER_SAMPLE_PERIOD_MS)
+
+static uint32_t ReplayIndexToSimSeconds(uint32_t replay_index)
+{
+    return (replay_index * POWER_SAMPLE_PERIOD_MS * POWER_SIM_TIME_SCALE) / 1000u;
+}
 
 static int32_t AbsI32(int32_t v)
 {
@@ -80,16 +91,127 @@ static int32_t ClampI32(int32_t v, int32_t lo, int32_t hi)
     return v;
 }
 
+static uint32_t LerpU32(uint32_t a, uint32_t b, uint32_t x, uint32_t x0, uint32_t x1)
+{
+    if (x <= x0)
+    {
+        return a;
+    }
+    if (x >= x1)
+    {
+        return b;
+    }
+    return a + (uint32_t)(((uint64_t)(b - a) * (uint64_t)(x - x0)) / (uint64_t)(x1 - x0));
+}
+
 static power_sample_t SampleFromReplay(uint32_t index)
 {
     power_sample_t out;
-    const replay_trace_point_t *src = &kReplayTrace_Default[index % REPLAY_TRACE_DEFAULT_LEN];
+    uint32_t t = index % REPLAY_CYCLE_TICKS;
+    uint32_t current_mA;
+    uint32_t voltage_mV;
+    uint32_t soc_pct;
+    uint32_t temp_c;
+    uint32_t ripple;
+    uint32_t watts;
+    uint32_t p8 = (REPLAY_CYCLE_TICKS * 8u) / 100u;
+    uint32_t p40 = (REPLAY_CYCLE_TICKS * 40u) / 100u;
+    uint32_t p58 = (REPLAY_CYCLE_TICKS * 58u) / 100u;
+    uint32_t p78 = (REPLAY_CYCLE_TICKS * 78u) / 100u;
+    uint32_t p94 = (REPLAY_CYCLE_TICKS * 94u) / 100u;
 
-    out.current_mA = src->current_mA;
-    out.power_mW = src->power_mW;
-    out.voltage_mV = src->voltage_mV;
-    out.soc_pct = src->soc_pct;
-    out.temp_c = src->temp_c;
+    /* Realistic 12-hour charging profile at 20 Hz with deterministic fault windows. */
+    if (t < p8)
+    {
+        /* Precharge and early ramp-up. */
+        current_mA = LerpU32(5000u, 26000u, t, 0u, p8);
+        voltage_mV = LerpU32(23750u, 23300u, t, 0u, p8);
+        soc_pct = LerpU32(4u, 15u, t, 0u, p8);
+        temp_c = LerpU32(29u, 47u, t, 0u, p8);
+    }
+    else if (t < p40)
+    {
+        /* Bulk high-current phase. */
+        current_mA = LerpU32(26000u, 50000u, t, p8, p40);
+        voltage_mV = LerpU32(23300u, 22950u, t, p8, p40);
+        soc_pct = LerpU32(15u, 58u, t, p8, p40);
+        temp_c = LerpU32(47u, 74u, t, p8, p40);
+    }
+    else if (t < p58)
+    {
+        /* Incident window: overcurrent, voltage anomaly, terminal heating/thermal runaway onset. */
+        current_mA = LerpU32(50000u, 43000u, t, p40, p58);
+        voltage_mV = LerpU32(22950u, 23200u, t, p40, p58);
+        soc_pct = LerpU32(58u, 73u, t, p40, p58);
+        temp_c = LerpU32(74u, 92u, t, p40, p58);
+
+        /* Repeating transient surge (cable/terminal intermittency). */
+        if (((t / 220u) % 7u) == 0u)
+        {
+            current_mA += 6500u;
+            temp_c += 2u;
+        }
+        /* Hard overcurrent burst. */
+        if ((t > ((REPLAY_CYCLE_TICKS * 46u) / 100u)) && (t < ((REPLAY_CYCLE_TICKS * 48u) / 100u)))
+        {
+            current_mA += 10000u;
+        }
+        /* Voltage sag event under high load. */
+        if ((t > ((REPLAY_CYCLE_TICKS * 47u) / 100u)) && (t < ((REPLAY_CYCLE_TICKS * 49u) / 100u)))
+        {
+            voltage_mV -= 900u;
+        }
+        /* Overvoltage control rebound pulse. */
+        if ((t > ((REPLAY_CYCLE_TICKS * 56u) / 100u)) && (t < ((REPLAY_CYCLE_TICKS * 57u) / 100u)))
+        {
+            voltage_mV += 700u;
+        }
+        /* Thermal runaway region. */
+        if ((t > ((REPLAY_CYCLE_TICKS * 52u) / 100u)) && (t < ((REPLAY_CYCLE_TICKS * 57u) / 100u)))
+        {
+            temp_c += 8u;
+            current_mA += 2500u;
+        }
+    }
+    else if (t < p78)
+    {
+        /* Controlled derating and recovery after incidents. */
+        current_mA = LerpU32(42000u, 21000u, t, p58, p78);
+        voltage_mV = LerpU32(23200u, 23550u, t, p58, p78);
+        soc_pct = LerpU32(73u, 89u, t, p58, p78);
+        temp_c = LerpU32(90u, 66u, t, p58, p78);
+    }
+    else if (t < p94)
+    {
+        /* CV taper. */
+        current_mA = LerpU32(21000u, 8500u, t, p78, p94);
+        voltage_mV = LerpU32(23550u, 24000u, t, p78, p94);
+        soc_pct = LerpU32(89u, 98u, t, p78, p94);
+        temp_c = LerpU32(66u, 48u, t, p78, p94);
+    }
+    else
+    {
+        /* Top-off and settle. */
+        current_mA = LerpU32(8500u, 2400u, t, p94, REPLAY_CYCLE_TICKS - 1u);
+        voltage_mV = LerpU32(24000u, 24150u, t, p94, REPLAY_CYCLE_TICKS - 1u);
+        soc_pct = LerpU32(98u, 100u, t, p94, REPLAY_CYCLE_TICKS - 1u);
+        temp_c = LerpU32(48u, 38u, t, p94, REPLAY_CYCLE_TICKS - 1u);
+    }
+
+    /* Deterministic high-rate ripple to mimic realistic 20 Hz telemetry noise. */
+    ripple = (uint32_t)((index * 1103515245u + 12345u) >> 27);
+    voltage_mV += (int32_t)((ripple & 0x7u) - 3) * 3;
+    current_mA += (int32_t)(((ripple >> 3) & 0xFu) - 7) * 35;
+    temp_c += (int32_t)(((ripple >> 2) & 0x3u) - 1);
+
+    watts = (uint32_t)(((uint64_t)voltage_mV * (uint64_t)current_mA) / 100000u);
+    watts = (uint32_t)(((uint64_t)watts * (97u + (ripple & 0x3u))) / 100u);
+
+    out.current_mA = (uint16_t)ClampI32((int32_t)current_mA, 2000, 62000);
+    out.power_mW = (uint16_t)ClampI32((int32_t)watts, 200, 14000);
+    out.voltage_mV = (uint16_t)ClampI32((int32_t)voltage_mV, 21800, 24600);
+    out.soc_pct = (uint8_t)ClampI32((int32_t)soc_pct, 0, 100);
+    out.temp_c = (uint8_t)ClampI32((int32_t)temp_c, 24, 99);
     out.anomaly_score_pct = 0u;
     out.connector_wear_pct = 0u;
     out.ai_status = AI_STATUS_NORMAL;
@@ -348,6 +470,9 @@ void PowerData_Init(void)
     gPowerData.temp_hist_idx = 0u;
     gPowerData.temp_hist_ready = false;
     gPowerData.status_hold_ticks = 0u;
+    gPowerData.replay_hour_lock = false;
+    gPowerData.replay_hour_start_tick = 0u;
+    gPowerData.replay_hour_end_tick = 0u;
 
     for (i = 0u; i < POWER_TEMP_HISTORY_LEN; i++)
     {
@@ -398,9 +523,22 @@ void PowerData_Tick(void)
         return;
     }
 
-    gPowerData.replay_index = (gPowerData.replay_index + 1u) % REPLAY_TRACE_DEFAULT_LEN;
+    if (gPowerData.replay_hour_lock)
+    {
+        gPowerData.replay_index++;
+        if (gPowerData.replay_index >= gPowerData.replay_hour_end_tick)
+        {
+            gPowerData.replay_index = gPowerData.replay_hour_start_tick;
+        }
+    }
+    else
+    {
+        gPowerData.replay_index = (gPowerData.replay_index + 1u) % REPLAY_CYCLE_TICKS;
+    }
     gPowerData.current = SampleFromReplay(gPowerData.replay_index);
     UpdateAiModel(&prev);
+    gPowerData.current.elapsed_charge_sim_s = ReplayIndexToSimSeconds(gPowerData.replay_index);
+    gPowerData.current.elapsed_charge_s = gPowerData.current.elapsed_charge_sim_s;
 }
 
 const power_sample_t *PowerData_Get(void)
@@ -411,4 +549,41 @@ const power_sample_t *PowerData_Get(void)
 const char *PowerData_ModeName(void)
 {
     return (gPowerData.mode == POWER_DATA_SOURCE_LIVE_OVERRIDE) ? "live_override" : "replay";
+}
+
+void PowerData_SetReplayHour(uint8_t hour)
+{
+    power_sample_t prev = gPowerData.current;
+    uint32_t hour_idx = hour;
+    uint32_t start_tick;
+    uint32_t end_tick;
+
+    if (hour_idx >= REPLAY_CYCLE_HOURS)
+    {
+        hour_idx = REPLAY_CYCLE_HOURS - 1u;
+    }
+
+    start_tick = hour_idx * HOUR_TICKS;
+    end_tick = start_tick + HOUR_TICKS;
+    if (end_tick > REPLAY_CYCLE_TICKS)
+    {
+        end_tick = REPLAY_CYCLE_TICKS;
+    }
+    if (end_tick <= start_tick)
+    {
+        end_tick = start_tick + 1u;
+    }
+
+    gPowerData.replay_hour_start_tick = start_tick;
+    gPowerData.replay_hour_end_tick = end_tick;
+    gPowerData.replay_hour_lock = true;
+    gPowerData.replay_index = start_tick;
+    gPowerData.current = SampleFromReplay(gPowerData.replay_index);
+
+    if (gPowerData.mode == POWER_DATA_SOURCE_REPLAY)
+    {
+        UpdateAiModel(&prev);
+        gPowerData.current.elapsed_charge_sim_s = ReplayIndexToSimSeconds(gPowerData.replay_index);
+        gPowerData.current.elapsed_charge_s = gPowerData.current.elapsed_charge_sim_s;
+    }
 }

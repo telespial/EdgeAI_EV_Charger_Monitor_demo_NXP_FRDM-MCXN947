@@ -48,5 +48,6 @@ void PowerData_SetLiveOverride(const power_sample_t *sample);
 void PowerData_Tick(void);
 const power_sample_t *PowerData_Get(void);
 const char *PowerData_ModeName(void);
+void PowerData_SetReplayHour(uint8_t hour);
 
 #endif

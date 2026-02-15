@@ -1,0 +1,9 @@
+golden_tag=GOLDEN_20260215_150517
+lock_tag=GOLDEN_LOCK_20260215_150517
+created_utc=2026-02-15T15:05:17Z
+artifact=edgeai_ev_charger_monitor_demo_cm33_core0_GOLDEN_20260215_150517.bin
+artifact_sha256_file=edgeai_ev_charger_monitor_demo_cm33_core0_GOLDEN_20260215_150517.sha256
+source_build=mcuxsdk_ws/build/edgeai_ev_charger_monitor_demo_cm33_core0.bin
+board=FRDM-MCXN947
+probe=MCU-LINK FRDM-MCXN947
+notes=Current validated dashboard with hour-based replay controls, touch AI toggle, scope legends/colors, elapsed sync, and UI alignment fixes.

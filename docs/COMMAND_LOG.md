@@ -176,3 +176,146 @@ Format:
 - 2026-02-15 05:38:30 | update docs/START_HERE.md docs/PROJECT_STATE.md STATUS.md docs/RESTORE_POINTS.md docs/failsafe.md docs/TODO.md | document unresolved AI touch-button issue and set new restore baseline
 - 2026-02-15 05:41:05 | git add -A && git commit -m "Golden restore point 20260215_053739; document touch-button blocker" | checkpoint current firmware+docs state as new golden/failsafe baseline
 - 2026-02-15 05:41:22 | git tag -a GOLDEN_20260215_053739 && git tag -a GOLDEN_LOCK_20260215_053739 | create required golden and lock restore tags for this baseline
+2026-02-15 07:21:42 | ./tools/build_frdmmcxn947.sh debug (timed out; CMake error edgefast_bluetooth) | build attempt failed
+2026-02-15 07:22:11 | apply_patch docs/PROJECT_STATE.md | record build failure in project state
+2026-02-15 07:22:16 | apply_patch STATUS.md | record build failure in status
+2026-02-15 07:23:24 | ./tools/build_frdmmcxn947.sh debug (CMake errors: edgefast_bluetooth mcux_set_variable; missing middleware/eiq/mpp/CMakeLists.txt) | build failed
+
+## 2026-02-15
+- `2026-02-15` | `./tools/build_frdmmcxn947.sh debug` | WARN | Build failed during CMake configure because required MCUX middleware paths were missing (`edgefast_bluetooth` arg errors, missing `middleware/eiq/mpp/CMakeLists.txt`), so no fresh `mcuxsdk_ws/build` artifact was produced.
+- `2026-02-15` | `./tools/flash_failsafe.sh failsafe/edgeai_ev_charger_monitor_demo_cm33_core0_GOLDEN_20260215_053739.bin` | PASS | Flashed latest available project firmware package via LinkServer v25.12.83 to probe `2PZWMSBKUXU22` (`MCXN947:FRDM-MCXN947`).
+- `2026-02-15` | `apply_patch sdk_example/install_mcux_overlay.sh tools/build_frdmmcxn947.sh tools/patch_mcuxsdk.sh` | PASS | Added deterministic overlay reinstall during build and workspace patch guard to skip missing `middleware/eiq/mpp` CMake integration.
+- `2026-02-15` | `apply_patch src/edgeai_ev_charger_monitor_demo.c` | PASS | Reworked AI-touch toggle flow: removed INT-edge forced toggle, added coordinate-validated press-only toggle, and added UART touch debug logs (`TOUCH_PRESS`, `TOUCH_HOLD`, `TOUCH_INT_EDGE`).
+- `2026-02-15` | `./tools/build_frdmmcxn947.sh debug` | PASS | Build now configures and links successfully; optional `middleware/eiq/mpp` is explicitly skipped when missing.
+- `2026-02-15` | `./tools/flash_frdmmcxn947.sh` | PASS | Flashed `mcuxsdk_ws/build` image with LinkServer v25.12.83 to probe `#1` (`2PZWMSBKUXU22`, MCXN947:FRDM-MCXN947).
+- `2026-02-15` | `apply_patch src/edgeai_ev_charger_monitor_demo.c` | PASS | Fixed GT911 control path: INT pin now driven high/low as GPIO for init, reset callback now drives reset GPIO, and AI-pill hit-test now maps from raw touch coordinates with scale/rotate/mirror candidates.
+- `2026-02-15` | `./tools/build_frdmmcxn947.sh debug && ./tools/flash_frdmmcxn947.sh` | PASS | Rebuilt and flashed touch-fix firmware to FRDM-MCXN947 via LinkServer probe `#1`.
+- `2026-02-15` | `apply_patch src/edgeai_ev_charger_monitor_demo.c` | PASS | Added controlled AI-toggle fallback on GT911 INT edge when no coordinate packet is available (`AI_TOGGLE src=touch_int_edge`) and kept coordinate press path.
+- `2026-02-15` | `./tools/build_frdmmcxn947.sh debug && ./tools/flash_frdmmcxn947.sh` | PASS | Rebuilt and flashed INT-edge fallback touch firmware to FRDM-MCXN947 via LinkServer probe `#1`.
+- `2026-02-15` | `review touch flow in EdgeAI_3D_Printer_Spool_Size_ToF_demo_NXP_FRDM-MCXN947` | PASS | Compared GT911 poll/edge handling and coordinate mapping model from `src/tof_demo.c` for direct port.
+- `2026-02-15` | `apply_patch src/edgeai_ev_charger_monitor_demo.c` | PASS | Ported touch handling to match 3D-printer model: single transform (`x=y`, `y=res_x-x`), pressed-edge detection (`pressed && !was_down`), periodic touch polling, and removed INT-edge fallback toggles.
+- `2026-02-15` | `./tools/build_frdmmcxn947.sh debug && ./tools/flash_frdmmcxn947.sh` | PASS | Rebuilt and flashed 3D-printer-model touch firmware to FRDM-MCXN947 via LinkServer probe `#1`.
+- `2026-02-15` | `apply_patch src/edgeai_ev_charger_monitor_demo.c` | PASS | Implemented option 2 touch-priority UI mode: stop continuous data-driven gauge refresh and keep button polling active; redraw on AI toggle only.
+- `2026-02-15` | `./tools/build_frdmmcxn947.sh debug && ./tools/flash_frdmmcxn947.sh` | PASS | Rebuilt and flashed option-2 touch-priority firmware to FRDM-MCXN947 via LinkServer probe `#1`.
+- `2026-02-15` | `apply_patch src/gauge_render.h` | PASS | Enlarged AI touchbutton bounds and moved button to centered top position.
+- `2026-02-15` | `./tools/build_frdmmcxn947.sh debug && ./tools/flash_frdmmcxn947.sh` | PASS | Rebuilt and flashed centered/large AI-button firmware to FRDM-MCXN947 via LinkServer probe `#1`.
+- `2026-02-15 12:08:34` | `sed -n ... start_here/docs/AGENTS/TODO + PROJECT_STATE/OPS_RUNBOOK/HARDWARE_SETUP/BUILD_FLASH/RESTORE_POINTS/COMMAND_LOG` | PASS | Re-read required root/project docs and current state before build/flash.
+- `2026-02-15 12:10:29` | `./tools/build_frdmmcxn947.sh debug` | PASS | Built touch-only test firmware (`src/edgeai_ev_charger_monitor_demo.c`) with centered AI ON/OFF button.
+- `2026-02-15 12:11:06` | `./tools/flash_frdmmcxn947.sh` | PASS | Flashed touch-only test firmware to FRDM-MCXN947 via LinkServer probe `#1` (`2PZWMSBKUXU22`).
+- `2026-02-15 12:11:51` | `apply_patch docs/COMMAND_LOG.md docs/PROJECT_STATE.md STATUS.md` | PASS | Recorded touch-only test-app deployment and build/flash results in required project docs.
+- `2026-02-15 12:14:58` | `./tools/flash_frdmmcxn947.sh` | PASS | Reflashed current touch-only test firmware to FRDM-MCXN947 via LinkServer probe `#1` (`HZ22T3AOM4Z55`).
+- `2026-02-15 12:15:08` | `tail -n ... docs/COMMAND_LOG.md docs/PROJECT_STATE.md STATUS.md` | PASS | Reviewed latest doc tails before appending this reflash update.
+- `2026-02-15 12:15:08` | `apply_patch docs/COMMAND_LOG.md docs/PROJECT_STATE.md STATUS.md` | PASS | Logged reflash action and updated required project state/status notes.
+- `2026-02-15 12:16:31` | `rg -n ... src/tof_demo.c + sed -n ... src/tof_demo.c` | PASS | Compared touch implementation against known-good 3D-printer demo (GT911 init/pin callbacks/poll flow).
+- `2026-02-15 12:18:22` | `apply_patch src/edgeai_ev_charger_monitor_demo.c` | PASS | Matched GT911 pin callbacks to known-good model (`CLOCK_EnableClock(kCLOCK_Port4)`, passive INT config, reset callback no-op) and adjusted touch delay clock source.
+- `2026-02-15 12:19:00` | `./tools/build_frdmmcxn947.sh debug && ./tools/flash_frdmmcxn947.sh` | PASS | Built and flashed touch-callback alignment fix to FRDM-MCXN947 (probe `#1`).
+- `2026-02-15 12:19:17` | `apply_patch src/edgeai_ev_charger_monitor_demo.c` | PASS | Added touch-down diagnostics log (`TOUCH_DOWN,x,y,IN_BUTTON|OUTSIDE_BUTTON`) on press edge.
+- `2026-02-15 12:19:46` | `./tools/build_frdmmcxn947.sh debug && ./tools/flash_frdmmcxn947.sh` | PASS | Built and flashed touch-diagnostic firmware to FRDM-MCXN947 (probe `#1`).
+- `2026-02-15 12:19:50` | `apply_patch docs/COMMAND_LOG.md docs/PROJECT_STATE.md STATUS.md` | PASS | Recorded touch-debug callback alignment and diagnostic logging deployment in required docs.
+- `2026-02-15 12:22:54` | `apply_patch src/edgeai_ev_charger_monitor_demo.c` | PASS | Switched touch init to match known-good ToF pattern: removed custom LPI2C master re-init and manual INT/RST pin pre-init, added GT911 status code logging.
+- `2026-02-15 12:23:19` | `./tools/build_frdmmcxn947.sh debug && ./tools/flash_frdmmcxn947.sh` | PASS | Built and flashed ToF-aligned GT911 init firmware to FRDM-MCXN947 (probe `#1`).
+- `2026-02-15 12:35:58` | `apply_patch src/edgeai_ev_charger_monitor_demo.c` | PASS | Moved LCD init/draw ahead of touch init so the button renders even if GT911 init stalls/fails.
+- `2026-02-15 12:36:20` | `./tools/build_frdmmcxn947.sh debug && ./tools/flash_frdmmcxn947.sh` | PASS | Built and flashed LCD-first startup firmware to FRDM-MCXN947 (probe `#1`).
+- `2026-02-15 12:38:21` | `apply_patch src/edgeai_ev_charger_monitor_demo.c` | PASS | Removed residual touch reset pin assumptions (`P4_7`) and GPIO dependency; GT911 reset callback remains explicit no-op due LCD_RST ownership.
+- `2026-02-15 12:38:53` | `./tools/build_frdmmcxn947.sh debug && ./tools/flash_frdmmcxn947.sh` | PASS | Built and flashed touch-reset-cleanup firmware to FRDM-MCXN947 (probe `#1`).
+- `2026-02-15 12:38:58` | `apply_patch docs/COMMAND_LOG.md docs/PROJECT_STATE.md STATUS.md` | PASS | Recorded MRD-driven touch-reset cleanup and deployment status in required docs.
+- `2026-02-15 12:42:38` | `apply_patch src/edgeai_ev_charger_monitor_demo.c` | PASS | Enabled brute-force touch proof mode: toggle AI state on any touch-down (`src=any_touch`) while still logging coordinates.
+- `2026-02-15 12:43:21` | `./tools/build_frdmmcxn947.sh debug && ./tools/flash_frdmmcxn947.sh` | PASS | Built and flashed any-touch toggle diagnostic firmware to FRDM-MCXN947 (probe `#1`).
+- `2026-02-15 12:43:25` | `apply_patch docs/COMMAND_LOG.md docs/PROJECT_STATE.md STATUS.md` | PASS | Recorded any-touch diagnostic deployment and status updates in required docs.
+- `2026-02-15 12:44:57` | `rg/sed compare cm33_core0/hardware_init.c (EV vs ToF)` | PASS | Identified missing FLEXCOMM2 clock attach in EV app hardware init while GT911 uses LPI2C2.
+- `2026-02-15 12:45:26` | `apply_patch sdk_example/.../cm33_core0/hardware_init.c` | PASS | Ported ToF-equivalent Arduino I2C FC2 clock setup into EV app `BOARD_InitHardware()`.
+- `2026-02-15 12:50:47` | `./tools/build_frdmmcxn947.sh debug && ./tools/flash_frdmmcxn947.sh` | PASS | Built and flashed FC2-clock hardware-init fix to FRDM-MCXN947 (probe `#1`).
+- `2026-02-15 12:50:51` | `apply_patch docs/COMMAND_LOG.md docs/PROJECT_STATE.md STATUS.md` | PASS | Recorded FC2 board-init parity fix and deployment in required project docs.
+- `2026-02-15 12:52:14` | `apply_patch src/edgeai_ev_charger_monitor_demo.c` | PASS | Added explicit FC2/LPI2C2 master init (400 kHz) before GT911 init, mirroring ToF stack’s I2C bring-up dependency path.
+- `2026-02-15 12:53:45` | `./tools/build_frdmmcxn947.sh debug && ./tools/flash_frdmmcxn947.sh` | PASS | Built and flashed touch app with explicit LPI2C2 init to FRDM-MCXN947 (probe `#1`).
+- `2026-02-15 12:53:49` | `apply_patch docs/COMMAND_LOG.md docs/PROJECT_STATE.md STATUS.md` | PASS | Recorded explicit LPI2C2 bring-up port and deployment in required project docs.
+- `2026-02-15 12:54:23` | `apply_patch src/edgeai_ev_charger_monitor_demo.c` | PASS | Restored normal behavior: toggle only on touch-down inside button bounds; removed any-touch diagnostic source logging.
+- `2026-02-15 12:55:22` | `./tools/build_frdmmcxn947.sh debug && ./tools/flash_frdmmcxn947.sh` | PASS | Built and flashed cleaned button-only touch test firmware to FRDM-MCXN947 (probe `#1`).
+- `2026-02-15 12:55:26` | `apply_patch docs/COMMAND_LOG.md docs/PROJECT_STATE.md STATUS.md` | PASS | Recorded post-diagnostic cleanup and retained-touch-fix state in required docs.
+- `2026-02-15 12:57:19` | `replace src/edgeai_ev_charger_monitor_demo.c` | PASS | Reintegrated full EV dashboard runtime (`PowerData` + `GaugeRender`) and wired AI pill touch toggle using proven GT911/FC2/LPI2C2 path.
+- `2026-02-15 12:59:08` | `./tools/build_frdmmcxn947.sh debug && ./tools/flash_frdmmcxn947.sh` | PASS | Built and flashed EV dashboard + touchbutton integrated firmware to FRDM-MCXN947 (probe `#1`).
+- `2026-02-15 12:59:14` | `apply_patch docs/COMMAND_LOG.md docs/PROJECT_STATE.md STATUS.md` | PASS | Recorded dashboard reintegration and touchbutton wiring updates in required docs.
+- `2026-02-15 13:00:12` | `apply_patch src/gauge_render.h src/gauge_render.c` | PASS | Resized AI pill to half width and 3/4 height; centered label vertically for new dimensions.
+- `2026-02-15 13:01:18` | `./tools/build_frdmmcxn947.sh debug && ./tools/flash_frdmmcxn947.sh` | PASS | Built and flashed dashboard firmware with resized AI touchbutton to FRDM-MCXN947 (probe `#1`).
+- `2026-02-15 13:01:22` | `apply_patch docs/COMMAND_LOG.md docs/PROJECT_STATE.md STATUS.md` | PASS | Recorded AI-pill resize/text-fit change and deployment in required docs.
+- `2026-02-15 13:02:14` | `apply_patch src/gauge_render.c` | PASS | Added UI text renderer with drop-shadow (`DrawTextUi`) and applied it across dashboard labels/status fields for improved readability.
+- `2026-02-15 13:03:15` | `./tools/build_frdmmcxn947.sh debug && ./tools/flash_frdmmcxn947.sh` | PASS | Built and flashed dashboard typography enhancement firmware to FRDM-MCXN947 (probe `#1`).
+- `2026-02-15 13:03:19` | `apply_patch docs/COMMAND_LOG.md docs/PROJECT_STATE.md STATUS.md` | PASS | Recorded dashboard typography/readability enhancement deployment in required docs.
+- `2026-02-15 13:05:44` | `apply_patch src/edgeai_ev_charger_monitor_demo.c` | PASS | Throttled dashboard redraw cadence to 500 ms while keeping power-data tick at 20 Hz and immediate redraw on AI toggle.
+- `2026-02-15 13:07:28` | `./tools/build_frdmmcxn947.sh debug && ./tools/flash_frdmmcxn947.sh` | PASS | Built and flashed 500 ms display-refresh cadence firmware to FRDM-MCXN947 (probe `#1`).
+- `2026-02-15 13:10:00` | `apply_patch docs/COMMAND_LOG.md docs/PROJECT_STATE.md STATUS.md` | PASS | Recorded 20 Hz data / 500 ms display cadence update in required docs.
+- `2026-02-15 13:12:45` | `apply_patch src/gauge_render.c` | PASS | Implemented stricter dirty-region rendering: incremental scope column updates and per-line terminal redraws (no full panel wipes).
+- `2026-02-15 13:13:36` | `./tools/build_frdmmcxn947.sh debug && ./tools/flash_frdmmcxn947.sh` | PASS | Built and flashed dirty-region optimized dashboard firmware to FRDM-MCXN947 (probe `#1`).
+- `2026-02-15 13:13:40` | `apply_patch docs/COMMAND_LOG.md docs/PROJECT_STATE.md STATUS.md` | PASS | Recorded dirty-region no-wipe optimization deployment in required docs.
+- `2026-02-15 13:21:38` | `apply_patch src/gauge_render.c src/text5x7.c` | PASS | Fixed minor UI issues: main gauge center refresh on needle move, numeric spacing cleanup, normal-state alert box text/logic update, and added missing `Y` glyph.
+- `2026-02-15 13:21:38` | `./tools/build_frdmmcxn947.sh debug` | PASS | Built dashboard firmware with UI artifact/formatting/alert/glyph fixes.
+- `2026-02-15 13:21:38` | `./tools/flash_frdmmcxn947.sh` | PASS | Flashed updated dashboard firmware to FRDM-MCXN947 (probe `#1`).
+- `2026-02-15 13:25:47` | `apply_patch src/gauge_render.c src/text5x7.c` | PASS | Added non-AI rule-based status path (temp/voltage/current overage thresholds) for AI-off mode and added `.` glyph so decimal values render correctly.
+- `2026-02-15 13:25:47` | `./tools/build_frdmmcxn947.sh debug && ./tools/flash_frdmmcxn947.sh` | PASS | Built and flashed firmware with AI-off status rules and decimal-point rendering fix to FRDM-MCXN947 (probe `#1`).
+- `2026-02-15 13:32:45` | `apply_patch src/power_data_source.c src/gauge_render.c` | PASS | Replaced static replay table feed with procedural realistic 20 Hz ~11-hour EV charge profile (including 180F peak region) and remapped scope to a 6-hour snapshot cadence.
+- `2026-02-15 13:32:45` | `./tools/build_frdmmcxn947.sh debug` | PASS | Built firmware with procedural long-cycle replay model and 6-hour scope snapshot behavior.
+- `2026-02-15 13:32:45` | `./tools/flash_frdmmcxn947.sh` | PASS | Flashed updated long-cycle replay/scope firmware to FRDM-MCXN947 (probe `#1`).
+- `2026-02-15 13:41:43` | `apply_patch src/gauge_render.c src/power_data_source.c` | PASS | Updated scope to plot power+temperature only with scale caps (`14kW`, `100C`), updated AI-off thresholds (`75C/85C`, `10kW/12kW`) with explicit reason labels, and raised replay headroom so power can exceed warning/fault thresholds.
+- `2026-02-15 13:41:43` | `./tools/build_frdmmcxn947.sh debug && ./tools/flash_frdmmcxn947.sh` | PASS | Built and flashed firmware with power/temp-only scope and new AI-off threshold logic to FRDM-MCXN947 (probe `#1`).
+- `2026-02-15 13:43:08` | `apply_patch src/gauge_render.c` | PASS | Changed scope sweep direction to right-to-left and added persistent L-shaped grid axes (left vertical + bottom horizontal).
+- `2026-02-15 13:43:08` | `./tools/build_frdmmcxn947.sh debug && ./tools/flash_frdmmcxn947.sh` | PASS | Built and flashed right-to-left scope + L-grid update to FRDM-MCXN947 (probe `#1`).
+- `2026-02-15 13:45:36` | `apply_patch src/gauge_render.c` | PASS | Reverted scope motion to left-to-right and adjusted L-axis endpoints to remove tiny vertical artifact above `STATUS`.
+- `2026-02-15 13:45:36` | `./tools/build_frdmmcxn947.sh debug && ./tools/flash_frdmmcxn947.sh` | PASS | Built and flashed left-to-right scope + axis artifact cleanup to FRDM-MCXN947 (probe `#1`).
+- `2026-02-15 13:48:12` | `apply_patch src/gauge_render.c` | PASS | Added explicit terminal-header cleanup for persistent `|` artifact, restored center-gauge `VAC` label, and reformatted lower wattage gauge as centered `kW` decimal value to avoid blank/clipping.
+- `2026-02-15 13:48:12` | `./tools/build_frdmmcxn947.sh debug && ./tools/flash_frdmmcxn947.sh` | PASS | Built and flashed artifact/label/wattage visibility fixes to FRDM-MCXN947 (probe `#1`).
+- `2026-02-15 13:51:08` | `apply_patch src/gauge_render.c` | PASS | Fixed main-gauge draw order by forcing voltage redraw after center-face refresh events, and added terminal-header refresh each dynamic update to suppress persistent `|` above `STATUS`.
+- `2026-02-15 13:51:08` | `./tools/build_frdmmcxn947.sh debug && ./tools/flash_frdmmcxn947.sh` | PASS | Built and flashed main-voltage layering + status-header artifact suppression update to FRDM-MCXN947 (probe `#1`).
+- `2026-02-15 13:52:37` | `apply_patch src/gauge_render.c` | PASS | Diagnostic isolation pass: disabled scope L-axis drawing completely to validate whether it is the source of the persistent `|` above `STATUS`.
+- `2026-02-15 13:52:37` | `./tools/build_frdmmcxn947.sh debug && ./tools/flash_frdmmcxn947.sh` | PASS | Built and flashed scope-axis-disabled diagnostic firmware to FRDM-MCXN947 (probe `#1`).
+- `2026-02-15 13:58:19` | `apply_patch src/gauge_render.c` | PASS | Restored L-axis scope grid, added hard-clear of scope/terminal gap band to remove persistent stray `|`, and fixed value-band redraw gating so center voltage and mini-gauge values always redraw after background clears.
+- `2026-02-15 13:58:19` | `./tools/build_frdmmcxn947.sh debug && ./tools/flash_frdmmcxn947.sh` | PASS | Built and flashed L-grid restore + gap-clear + voltage layering fix to FRDM-MCXN947 (probe `#1`).
+- `2026-02-15 14:01:17` | `apply_patch src/gauge_render.c` | PASS | User-requested voltage format/layout update: center value now renders as centered `VAC` suffix string and shifted down by one text height; removed separate static `VAC` label to avoid duplicate overlap.
+- `2026-02-15 14:01:17` | `./tools/build_frdmmcxn947.sh debug && ./tools/flash_frdmmcxn947.sh` | PASS | Built and flashed centered/downshifted `VAC` voltage text update to FRDM-MCXN947 (probe `#1`).
+- `2026-02-15 14:06:10` | `apply_patch src/power_data_source.c` | PASS | Upgraded replay generator to realistic 20 Hz / 12-hour charge cycle with deterministic incident windows (overcurrent bursts, voltage sag/rebound anomaly, excessive heat and thermal-runaway segment, terminal-stress transients) for gauge/plot/AI analysis.
+- `2026-02-15 14:06:10` | `./tools/build_frdmmcxn947.sh debug && ./tools/flash_frdmmcxn947.sh` | PASS | Built and flashed 12-hour realistic incident-rich replay dataset to FRDM-MCXN947 (probe `#1`).
+- `2026-02-15 14:11:20` | `apply_patch src/gauge_render.h src/gauge_render.c src/edgeai_ev_charger_monitor_demo.c` | PASS | Added touch timeline scrub bar above scope (removed title text), implemented history window scrubbing for 12h data navigation, and wired touch drag handling through `GaugeRender_HandleTouch()`.
+- `2026-02-15 14:11:20` | `apply_patch src/gauge_render.c` | PASS | Removed unused legacy incremental-scope symbols after scrub-bar refactor to satisfy `-Werror` build.
+- `2026-02-15 14:11:20` | `./tools/build_frdmmcxn947.sh debug && ./tools/flash_frdmmcxn947.sh` | PASS | Built and flashed timeline scrub-bar firmware to FRDM-MCXN947 (probe `#1`).
+- `2026-02-15 14:13:48` | `apply_patch src/gauge_render.c` | PASS | Replaced swipe scrub interaction with discrete left/right timeline buttons; timeline now steps in 1-hour increments from `0H` to `12H`.
+- `2026-02-15 14:13:48` | `apply_patch src/gauge_render.c` | PASS | Removed remaining unused scrub-era symbols to pass strict `-Werror` compile.
+- `2026-02-15 14:13:48` | `./tools/build_frdmmcxn947.sh debug && ./tools/flash_frdmmcxn947.sh` | PASS | Built and flashed left/right hour-step timeline firmware to FRDM-MCXN947 (probe `#1`).
+- `2026-02-15 14:15:37` | `apply_patch src/gauge_render.c` | PASS | Fixed timeline button visibility: draw controls in static scope frame (not only dynamic pass), enlarged button hitboxes, and changed labels to supported glyphs (`L`/`R`) instead of unsupported `<`/`>`.
+- `2026-02-15 14:15:37` | `./tools/build_frdmmcxn947.sh debug && ./tools/flash_frdmmcxn947.sh` | PASS | Built and flashed visible left/right hour-step timeline button update to FRDM-MCXN947 (probe `#1`).
+- `2026-02-15 14:29:40` | `apply_patch src/gauge_render.c` | PASS | Increased timeline hour box height to 3x prior size (`TIMELINE_Y1`), vertically centered `L/R` and hour text, and moved plot origin below taller control bar to prevent overlap.
+- `2026-02-15 14:29:40` | `./tools/build_frdmmcxn947.sh debug` | PASS | Built firmware with taller timeline hour box layout update.
+- `2026-02-15 14:29:40` | `./tools/flash_frdmmcxn947.sh` | PASS | Flashed taller timeline hour box firmware to FRDM-MCXN947 (probe `#1`, `HZ22T3AOM4Z55`).
+- `2026-02-15 14:31:47` | `apply_patch src/edgeai_ev_charger_monitor_demo.c src/gauge_render.c` | PASS | Improved touch responsiveness (`10 ms` poll), moved timeline bar to top of screen, restored original graph plot height, and added hold-to-repeat stepping on left/right hour buttons.
+- `2026-02-15 14:31:47` | `./tools/build_frdmmcxn947.sh debug` | PASS | Built firmware with fast touch poll + top timeline + restored graph-height layout.
+- `2026-02-15 14:31:47` | `./tools/flash_frdmmcxn947.sh` | PASS | Flashed responsiveness/layout update to FRDM-MCXN947 (probe `#1`, `HZ22T3AOM4Z55`).
+- `2026-02-15 14:39:35` | `apply_patch src/power_data_source.h src/power_data_source.c src/gauge_render.h src/gauge_render.c src/edgeai_ev_charger_monitor_demo.c` | PASS | Added timeline-driven hour playback mode: selecting `0H..12H` now loads that hour window and replays it continuously; when end of selected hour is reached, replay loops back to that hour start.
+- `2026-02-15 14:39:35` | `./tools/build_frdmmcxn947.sh debug` | PASS | Built firmware with hour-window replay lock and timeline-to-dataset playback wiring.
+- `2026-02-15 14:39:35` | `./tools/flash_frdmmcxn947.sh` | PASS | Flashed timeline hour-playback loop update to FRDM-MCXN947 (probe `#1`, `HZ22T3AOM4Z55`).
+- `2026-02-15 14:45:27` | `apply_patch src/gauge_render.c` | PASS | UI/plot cleanup: corrected power readouts to `kW`, switched scope lines to `power=orange` and `temp=blue`, added matching colored `PWR`/`TEMP` legend below scope axis, and changed scope rendering to follow latest replay window (removing stale-hour saturation artifacts).
+- `2026-02-15 14:45:27` | `./tools/build_frdmmcxn947.sh debug` | PASS | Built firmware with scope color/unit/legend and latest-window plotting update.
+- `2026-02-15 14:45:27` | `./tools/flash_frdmmcxn947.sh` | PASS | Flashed scope/unit/color update to FRDM-MCXN947 (probe `#1`, `HZ22T3AOM4Z55`).
+- `2026-02-15 14:50:22` | `apply_patch src/text5x7.c src/gauge_render.c` | PASS | Added lowercase `k` glyph mapping so `kW` renders correctly, reduced and centered right-gauge `kW` unit text, and changed rendered power to be computed from displayed voltage/current for consistent `VAC x A -> kW` behavior.
+- `2026-02-15 14:50:22` | `./tools/build_frdmmcxn947.sh debug` | PASS | Built firmware with `kW` font/render fix and display-power consistency update.
+- `2026-02-15 14:50:22` | `./tools/flash_frdmmcxn947.sh` | PASS | Flashed `kW`/power-consistency update to FRDM-MCXN947 (probe `#1`, `HZ22T3AOM4Z55`).
+- `2026-02-15 14:53:56` | `apply_patch src/power_data_source.c src/gauge_render.c` | PASS | Fixed elapsed timer behavior: clock now tracks selected replay-hour window (derived from replay index), updates every second, moved lower in main gauge, and is drawn in the final dynamic pass so it stays visible on top.
+- `2026-02-15 14:53:56` | `./tools/build_frdmmcxn947.sh debug` | PASS | Built firmware with elapsed-timer replay-hour sync and top-layer/position updates.
+- `2026-02-15 14:53:56` | `./tools/flash_frdmmcxn947.sh` | PASS | Flashed elapsed-timer replay-hour/visibility update to FRDM-MCXN947 (probe `#1`, `HZ22T3AOM4Z55`).
+- `2026-02-15 14:55:27` | `apply_patch src/gauge_render.c` | PASS | Tightened elapsed background box width to content-driven sizing with only 3 px left/right margin around the longer of `ELAPSED` or `HH:MM:SS`, reducing gauge coverage.
+- `2026-02-15 14:55:27` | `./tools/build_frdmmcxn947.sh debug` | PASS | Built firmware with narrowed elapsed background box sizing.
+- `2026-02-15 14:55:27` | `./tools/flash_frdmmcxn947.sh` | PASS | Flashed elapsed-box width refinement to FRDM-MCXN947 (probe `#1`, `HZ22T3AOM4Z55`).
+- `2026-02-15 14:56:30` | `apply_patch src/gauge_render.c` | PASS | UI position tuning: moved center `VAC` text up by 8 px and moved elapsed label/time block up by 10 px.
+- `2026-02-15 14:56:30` | `./tools/build_frdmmcxn947.sh debug` | PASS | Built firmware with requested voltage/elapsed vertical position adjustments.
+- `2026-02-15 14:56:30` | `./tools/flash_frdmmcxn947.sh` | PASS | Flashed voltage/elapsed position update to FRDM-MCXN947 (probe `#1`, `HZ22T3AOM4Z55`).
+- `2026-02-15 14:57:42` | `apply_patch src/gauge_render.c` | PASS | Moved name text upward into top header line and changed default timeline hour from `12H` to `3H` (including reset/init paths).
+- `2026-02-15 14:57:42` | `./tools/build_frdmmcxn947.sh debug` | PASS | Built firmware with top-line name placement and default `3H` timeline.
+- `2026-02-15 14:57:42` | `./tools/flash_frdmmcxn947.sh` | PASS | Flashed top-line name + default `3H` timeline update to FRDM-MCXN947 (probe `#1`, `HZ22T3AOM4Z55`).
+- `2026-02-15 14:59:36` | `apply_patch src/power_data_source.c src/gauge_render.c` | PASS | Fixed regressions: restored replay-time scale in replay-index conversion so scope lines advance/render normally, and moved name text further up in the top header line.
+- `2026-02-15 14:59:36` | `./tools/build_frdmmcxn947.sh debug` | PASS | Built firmware with scope-line progression fix and additional top-header name shift.
+- `2026-02-15 14:59:36` | `./tools/flash_frdmmcxn947.sh` | PASS | Flashed regression-fix update to FRDM-MCXN947 (probe `#1`, `HZ22T3AOM4Z55`).
+- `2026-02-15 15:01:01` | `apply_patch src/gauge_render.c` | PASS | Matched top-left unit typography by reducing `A` unit to same font size as `kW` and centered it; moved name text further up into the top header line.
+- `2026-02-15 15:01:01` | `./tools/build_frdmmcxn947.sh debug` | PASS | Built firmware with `A`/`kW` font-size alignment and higher header-name placement.
+- `2026-02-15 15:01:01` | `./tools/flash_frdmmcxn947.sh` | PASS | Flashed unit-font/header-position update to FRDM-MCXN947 (probe `#1`, `HZ22T3AOM4Z55`).
+- `2026-02-15 15:02:51` | `apply_patch src/gauge_render.c` | PASS | Aligned top of name text with top of AI button by using the shared `AI_PILL_Y0` coordinate for header text Y placement.
+- `2026-02-15 15:02:51` | `./tools/build_frdmmcxn947.sh debug` | PASS | Built firmware with name/AI top-edge alignment update.
+- `2026-02-15 15:02:51` | `./tools/flash_frdmmcxn947.sh` | PASS | Flashed name/AI top-edge alignment update to FRDM-MCXN947 (probe `#1`, `HZ22T3AOM4Z55`).
+- `2026-02-15 15:06:13` | `cp/sha256sum -> failsafe/*GOLDEN_20260215_150517*` | PASS | Created new failsafe binary, checksum, and metadata for golden restore baseline from current build output.
+- `2026-02-15 15:06:13` | `apply_patch docs/RESTORE_POINTS.md docs/PROJECT_STATE.md STATUS.md` | PASS | Added `GOLDEN_20260215_150517` restore-point documentation and marked checkpoint as current golden/failsafe baseline.

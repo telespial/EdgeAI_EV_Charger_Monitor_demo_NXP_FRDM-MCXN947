@@ -5,12 +5,14 @@
 
 #include "power_data_source.h"
 
-#define GAUGE_RENDER_AI_PILL_X0 336
-#define GAUGE_RENDER_AI_PILL_Y0 5
-#define GAUGE_RENDER_AI_PILL_X1 442
-#define GAUGE_RENDER_AI_PILL_Y1 21
+#define GAUGE_RENDER_AI_PILL_X0 191
+#define GAUGE_RENDER_AI_PILL_Y0 4
+#define GAUGE_RENDER_AI_PILL_X1 288
+#define GAUGE_RENDER_AI_PILL_Y1 30
 
 bool GaugeRender_Init(void);
 void GaugeRender_DrawFrame(const power_sample_t *sample, bool ai_enabled);
+bool GaugeRender_HandleTouch(int32_t x, int32_t y, bool pressed);
+uint8_t GaugeRender_GetTimelineHour(void);
 
 #endif

@@ -1,6 +1,26 @@
 # Restore Points
 
 ## 2026-02-15 Golden Baseline
+- Golden tag: `GOLDEN_20260215_150517`
+- Lock tag: `GOLDEN_LOCK_20260215_150517`
+- Failsafe binary: `failsafe/edgeai_ev_charger_monitor_demo_cm33_core0_GOLDEN_20260215_150517.bin`
+- Failsafe checksum: `failsafe/edgeai_ev_charger_monitor_demo_cm33_core0_GOLDEN_20260215_150517.sha256`
+- Metadata: `failsafe/GOLDEN_20260215_150517_metadata.txt`
+
+### Baseline Contents
+- Touch AI on/off control operational with polling and edge-triggered toggle.
+- Timeline controls step replay hour and lock playback to selected hour window with loop-back.
+- Scope plots power/temp with color legend (`PWR` orange, `TEMP` blue) and hour replay behavior.
+- Elapsed timer synchronized with replay hour playback and visible on top layer.
+- Dashboard typography/layout refinements: aligned header name and gauge unit sizing (`A`/`kW` parity).
+
+### Restore Steps
+1. Use the failsafe binary directly.
+2. Flash:
+   `LinkServer flash --probe '#1' --update-mode none MCXN947:FRDM-MCXN947 load --addr 0x0 failsafe/edgeai_ev_charger_monitor_demo_cm33_core0_GOLDEN_20260215_150517.bin`
+3. Verify LCD, touch toggle, timeline step buttons, and UART startup logs.
+
+## 2026-02-15 Golden Baseline
 - Golden tag: `GOLDEN_20260215_053739`
 - Lock tag: `GOLDEN_LOCK_20260215_053739`
 - Failsafe binary: `failsafe/edgeai_ev_charger_monitor_demo_cm33_core0_GOLDEN_20260215_053739.bin`

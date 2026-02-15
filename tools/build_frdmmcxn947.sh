@@ -14,6 +14,7 @@ if [[ ! -d "$WS_DIR/.west" ]]; then
   exit 1
 fi
 
+MCUX_EXAMPLES_DIR="$WS_DIR/mcuxsdk/examples" "$ROOT_DIR/sdk_example/install_mcux_overlay.sh"
 "$ROOT_DIR/tools/patch_mcuxsdk.sh" "$WS_DIR"
 
 (

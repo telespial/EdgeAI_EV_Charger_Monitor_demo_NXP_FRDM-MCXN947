@@ -7,6 +7,7 @@
 /* Each glyph is 7 rows, 5 bits wide, MSB-first in the low 5 bits (bit 4..0). */
 static const uint8_t GLYPH_SPACE[7] = {0, 0, 0, 0, 0, 0, 0};
 static const uint8_t GLYPH_COLON[7] = {0x00, 0x04, 0x04, 0x00, 0x04, 0x04, 0x00};
+static const uint8_t GLYPH_DOT[7] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x06, 0x06};
 
 static const uint8_t GLYPH_0[7] = {0x0E, 0x11, 0x13, 0x15, 0x19, 0x11, 0x0E};
 static const uint8_t GLYPH_1[7] = {0x04, 0x0C, 0x04, 0x04, 0x04, 0x04, 0x0E};
@@ -41,6 +42,7 @@ static const uint8_t GLYPH_U[7] = {0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x0E};
 static const uint8_t GLYPH_V[7] = {0x11, 0x11, 0x11, 0x11, 0x11, 0x0A, 0x04};
 static const uint8_t GLYPH_W[7] = {0x11, 0x11, 0x11, 0x11, 0x15, 0x1B, 0x11};
 static const uint8_t GLYPH_X[7] = {0x11, 0x11, 0x0A, 0x04, 0x0A, 0x11, 0x11};
+static const uint8_t GLYPH_Y[7] = {0x11, 0x11, 0x0A, 0x04, 0x04, 0x04, 0x04};
 static const uint8_t GLYPH_Z[7] = {0x1F, 0x01, 0x02, 0x04, 0x08, 0x10, 0x1F};
 static const uint8_t GLYPH_LPAREN[7] = {0x02, 0x04, 0x08, 0x08, 0x08, 0x04, 0x02};
 static const uint8_t GLYPH_RPAREN[7] = {0x08, 0x04, 0x02, 0x02, 0x02, 0x04, 0x08};
@@ -83,13 +85,16 @@ static const uint8_t *edgeai_glyph5x7(char c)
         case 'V': return GLYPH_V;
         case 'W': return GLYPH_W;
         case 'X': return GLYPH_X;
+        case 'Y': return GLYPH_Y;
         case 'Z': return GLYPH_Z;
         case 'c': return GLYPH_C;
+        case 'k': return GLYPH_K;
         case 'm': return GLYPH_M;
         case 'v': return GLYPH_V;
         case 'w': return GLYPH_W;
 
         case ':': return GLYPH_COLON;
+        case '.': return GLYPH_DOT;
         case '%': return GLYPH_PERCENT;
         case '(': return GLYPH_LPAREN;
         case ')': return GLYPH_RPAREN;
