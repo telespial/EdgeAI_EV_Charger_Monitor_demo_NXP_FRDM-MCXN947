@@ -37,10 +37,10 @@ enum
     MAIN_CY = 170,
     MAIN_R = 84,
     MID_TOP_CX = 98,
-    MID_TOP_CY = 118,
+    MID_TOP_CY = 110,
     MID_BOT_CX = 98,
-    MID_BOT_CY = 222,
-    MID_R = 46,
+    MID_BOT_CY = 234,
+    MID_R = 42,
     BATT_X = 206,
     BATT_Y = 48,
     BATT_W = 62,
@@ -322,7 +322,7 @@ static void DrawStaticDashboard(const gauge_style_preset_t *style)
     DrawGaugeTicks11(MID_BOT_CX, MID_BOT_CY, MID_R - 12, style->palette.text_primary, RGB565(140, 140, 145));
 
     edgeai_text5x7_draw_scaled(MID_TOP_CX - 18, MID_TOP_CY + 34, 1, "CURRENT", style->palette.text_primary);
-    edgeai_text5x7_draw_scaled(MID_BOT_CX - 14, MID_BOT_CY + 34, 1, "POWER", style->palette.text_primary);
+    edgeai_text5x7_draw_scaled(MID_BOT_CX - 14, MID_BOT_CY + 50, 1, "POWER", style->palette.text_primary);
     brand_x = ((PANEL_X0 + PANEL_X1) / 2) - (edgeai_text5x7_width(2, "NXP EDGEAI") / 2);
     edgeai_text5x7_draw_scaled(brand_x, 286, 2, "NXP EDGEAI", RGB565(255, 208, 52));
 
@@ -451,8 +451,10 @@ void GaugeRender_DrawFrame(const power_sample_t *sample)
 
     if (!gDynamicReady || gPrevVoltage != sample->voltage_mV)
     {
+        int32_t x;
         snprintf(line, sizeof(line), "%4u", sample->voltage_mV);
-        edgeai_text5x7_draw_scaled(MAIN_CX - 34, MAIN_CY - 8, 3, line, style->palette.text_primary);
+        x = MAIN_CX - (edgeai_text5x7_width(3, line) / 2);
+        edgeai_text5x7_draw_scaled(x, MAIN_CY - 8, 3, line, style->palette.text_primary);
     }
 
     if (!gDynamicReady || gPrevCurrent != sample->current_mA)

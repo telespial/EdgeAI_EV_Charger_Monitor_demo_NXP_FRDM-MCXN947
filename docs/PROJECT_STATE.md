@@ -182,3 +182,10 @@ Project: `EdgeAI_EV_Charger_Monitor_demo_NXP_FRDM-MCXN947`
 ## Update 2026-02-15
 - Removed the three red hash/redline strokes from the large gauge.
 - Rebuilt and flashed successfully to FRDM-MCXN947.
+
+## Update 2026-02-15
+- Adjusted dashboard layout per visual spacing request:
+  - centered the large gauge numeric value using text-width centering
+  - moved `POWER` label below the lower small gauge
+  - increased vertical spacing between small gauges and reduced small-gauge radius
+- Rebuilt and flashed successfully to FRDM-MCXN947.

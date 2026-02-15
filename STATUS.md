@@ -49,3 +49,7 @@ State: initialized
 - Firmware rebuilt and reflashed after label/SOC display removal.
 - Removed three red hash lines from main gauge styling.
 - Firmware rebuilt and reflashed after redline-stroke removal.
+- Large gauge value text now centers dynamically in the main gauge.
+- `POWER` label moved lower, beneath the lower small gauge.
+- Increased space between small gauges (position and radius adjustments).
+- Firmware rebuilt and reflashed after layout refinements.

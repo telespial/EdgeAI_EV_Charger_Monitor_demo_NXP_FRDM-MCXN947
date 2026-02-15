@@ -92,3 +92,7 @@ Format:
 - 2026-02-14 17:31:32 | source tools/mcux_env.sh + install_mcux_overlay.sh + west build | compile redline-stroke removal
 - 2026-02-14 17:31:32 | WS_DIR=... BUILD_DIR=... ./tools/flash_frdmmcxn947.sh | flash redline-stroke removal
 - 2026-02-14 17:31:32 | update docs/PROJECT_STATE.md STATUS.md docs/COMMAND_LOG.md | record main-gauge redline removal
+- 2026-02-14 17:33:51 | patch src/gauge_render.c layout/text positioning | center main value text, move POWER label below lower gauge, increase gauge spacing
+- 2026-02-14 17:33:51 | source tools/mcux_env.sh + install_mcux_overlay.sh + west build | compile gauge spacing/alignment update
+- 2026-02-14 17:33:51 | WS_DIR=... BUILD_DIR=... ./tools/flash_frdmmcxn947.sh | flash spacing/alignment update
+- 2026-02-14 17:33:51 | update docs/PROJECT_STATE.md STATUS.md docs/COMMAND_LOG.md | record spacing and label placement changes
