@@ -120,3 +120,7 @@ Format:
 - 2026-02-14 17:43:52 | source tools/mcux_env.sh + install_mcux_overlay.sh + west build | compile guide/label alignment update
 - 2026-02-14 17:43:52 | WS_DIR=... BUILD_DIR=... ./tools/flash_frdmmcxn947.sh | flash guide/label alignment update
 - 2026-02-14 17:43:52 | update docs/PROJECT_STATE.md STATUS.md docs/COMMAND_LOG.md | record vertical-line spacing and CURRENT alignment changes
+- 2026-02-14 17:45:24 | patch src/gauge_render.c | add large A/W unit letters inside upper/lower small gauges
+- 2026-02-14 17:45:24 | source tools/mcux_env.sh + install_mcux_overlay.sh + west build | compile A/W in-gauge unit overlay update
+- 2026-02-14 17:45:24 | WS_DIR=... BUILD_DIR=... ./tools/flash_frdmmcxn947.sh | flash A/W in-gauge unit overlay update
+- 2026-02-14 17:45:24 | update docs/PROJECT_STATE.md STATUS.md docs/COMMAND_LOG.md | record in-gauge A/W unit letter addition

@@ -70,3 +70,5 @@ State: initialized
 - Left vertical guide moved left for more gauge spacing.
 - `CURRENT` text aligned with its short horizontal line using same offset pattern as `POWER`.
 - Firmware rebuilt and reflashed after guide/text alignment update.
+- Added large `A` and `W` unit letters inside small gauges for amps/watts visual context.
+- Firmware rebuilt and reflashed after unit-letter overlay addition.
