@@ -8,6 +8,14 @@
 
 static bool gLcdReady = false;
 static bool gStaticReady = false;
+static bool gDynamicReady = false;
+static int32_t gPrevSpeedIdx = -1;
+static int32_t gPrevPowerIdx = -1;
+static int32_t gPrevSocIdx = -1;
+static uint16_t gPrevCurrent = 0u;
+static uint16_t gPrevPower = 0u;
+static uint16_t gPrevVoltage = 0u;
+static uint8_t gPrevSoc = 0u;
 
 static int32_t ClampI32(int32_t v, int32_t lo, int32_t hi)
 {
@@ -73,29 +81,18 @@ static void DrawStaticDashboard(const gauge_style_preset_t *style)
     DrawGaugeTicks(150, 170, style->palette.text_secondary);
     DrawGaugeTicks(320, 170, style->palette.text_secondary);
 
-    edgeai_text5x7_draw_scaled(108, 236, 2, "CURRENT", style->palette.text_secondary);
-    edgeai_text5x7_draw_scaled(286, 236, 2, "POWER", style->palette.text_secondary);
-    edgeai_text5x7_draw_scaled(396, 146, 2, "SOC", style->palette.text_secondary);
+    edgeai_text5x7_draw_scaled(70, 278, 2, "CURRENT", style->palette.text_secondary);
+    edgeai_text5x7_draw_scaled(252, 278, 2, "POWER", style->palette.text_secondary);
+    edgeai_text5x7_draw_scaled(360, 20, 2, "SOC", style->palette.text_secondary);
+    edgeai_text5x7_draw_scaled(330, 42, 2, "BATT MV", style->palette.text_secondary);
 }
 
-static void RedrawGaugeDynamicBase(const gauge_style_preset_t *style)
+static void ClearValueBands(const gauge_style_preset_t *style)
 {
-    /* Clear only the moving areas to avoid full-screen raster flashing. */
-    par_lcd_s035_fill_rect(88, 108, 214, 232, style->palette.panel_black);
-    DrawRing(150, 170, 94, 12, style->palette.bezel_light, style->palette.panel_black);
-    DrawGaugeTicks(150, 170, style->palette.text_secondary);
-
-    par_lcd_s035_fill_rect(266, 116, 374, 224, style->palette.panel_black);
-    DrawRing(320, 170, 76, 10, style->palette.bezel_dark, style->palette.panel_black);
-    DrawGaugeTicks(320, 170, style->palette.text_secondary);
-
-    par_lcd_s035_fill_rect(374, 52, 462, 136, style->palette.panel_black);
-    DrawRing(418, 96, 44, 8, style->palette.bezel_light, style->palette.panel_black);
-
-    par_lcd_s035_fill_rect(94, 252, 218, 272, style->palette.panel_black);
-    par_lcd_s035_fill_rect(274, 252, 398, 272, style->palette.panel_black);
-    par_lcd_s035_fill_rect(354, 194, 462, 214, style->palette.panel_black);
-    par_lcd_s035_fill_rect(386, 162, 454, 182, style->palette.panel_black);
+    par_lcd_s035_fill_rect(60, 296, 230, 316, style->palette.panel_black);
+    par_lcd_s035_fill_rect(240, 296, 410, 316, style->palette.panel_black);
+    par_lcd_s035_fill_rect(350, 72, 462, 92, style->palette.panel_black);
+    par_lcd_s035_fill_rect(350, 112, 448, 132, style->palette.panel_black);
 }
 
 bool GaugeRender_Init(void)
@@ -108,6 +105,10 @@ bool GaugeRender_Init(void)
         style = GaugeStyle_GetCockpitPreset();
         DrawStaticDashboard(style);
         gStaticReady = true;
+        gDynamicReady = false;
+        gPrevSpeedIdx = -1;
+        gPrevPowerIdx = -1;
+        gPrevSocIdx = -1;
     }
     return gLcdReady;
 }
@@ -131,25 +132,80 @@ void GaugeRender_DrawFrame(const power_sample_t *sample)
     {
         DrawStaticDashboard(style);
         gStaticReady = true;
+        gDynamicReady = false;
+        gPrevSpeedIdx = -1;
+        gPrevPowerIdx = -1;
+        gPrevSocIdx = -1;
     }
-    RedrawGaugeDynamicBase(style);
 
     speed_idx = ClampI32((int32_t)sample->current_mA / 20, 0, 10);
     power_idx = ClampI32((int32_t)sample->power_mW / 260, 0, 10);
     soc_idx = ClampI32((int32_t)sample->soc_pct / 10, 0, 10);
 
-    DrawNeedleBand(150, 170, 52, speed_idx, 10, style->palette.needle_amber);
-    DrawNeedleBand(320, 170, 46, power_idx, 10, style->palette.accent_red);
-    DrawNeedleBand(418, 96, 24, soc_idx, 10, style->palette.accent_green);
+    if (gDynamicReady)
+    {
+        if (gPrevSpeedIdx != speed_idx)
+        {
+            DrawNeedleBand(150, 170, 52, gPrevSpeedIdx, 10, style->palette.panel_black);
+            DrawNeedleBand(150, 170, 52, speed_idx, 10, style->palette.needle_amber);
+            gPrevSpeedIdx = speed_idx;
+        }
+        if (gPrevPowerIdx != power_idx)
+        {
+            DrawNeedleBand(320, 170, 46, gPrevPowerIdx, 10, style->palette.panel_black);
+            DrawNeedleBand(320, 170, 46, power_idx, 10, style->palette.accent_red);
+            gPrevPowerIdx = power_idx;
+        }
+        if (gPrevSocIdx != soc_idx)
+        {
+            DrawNeedleBand(418, 96, 24, gPrevSocIdx, 10, style->palette.panel_black);
+            DrawNeedleBand(418, 96, 24, soc_idx, 10, style->palette.accent_green);
+            gPrevSocIdx = soc_idx;
+        }
+    }
+    else
+    {
+        DrawNeedleBand(150, 170, 52, speed_idx, 10, style->palette.needle_amber);
+        DrawNeedleBand(320, 170, 46, power_idx, 10, style->palette.accent_red);
+        DrawNeedleBand(418, 96, 24, soc_idx, 10, style->palette.accent_green);
+        gPrevSpeedIdx = speed_idx;
+        gPrevPowerIdx = power_idx;
+        gPrevSocIdx = soc_idx;
+        gDynamicReady = true;
+    }
 
-    snprintf(line, sizeof(line), "%4u MA", sample->current_mA);
-    edgeai_text5x7_draw_scaled(94, 254, 2, line, style->palette.text_primary);
+    if (!gDynamicReady || gPrevCurrent != sample->current_mA || gPrevPower != sample->power_mW ||
+        gPrevVoltage != sample->voltage_mV || gPrevSoc != sample->soc_pct)
+    {
+        ClearValueBands(style);
+    }
 
-    snprintf(line, sizeof(line), "%4u MW", sample->power_mW);
-    edgeai_text5x7_draw_scaled(274, 254, 2, line, style->palette.text_primary);
+    if (!gDynamicReady || gPrevCurrent != sample->current_mA)
+    {
+        snprintf(line, sizeof(line), "%4u MA", sample->current_mA);
+        edgeai_text5x7_draw_scaled(66, 298, 2, line, style->palette.text_primary);
+    }
 
-    snprintf(line, sizeof(line), "%3u%%", sample->soc_pct);
-    edgeai_text5x7_draw_scaled(386, 164, 2, line, style->palette.text_primary);
-    snprintf(line, sizeof(line), "%5u MV", sample->voltage_mV);
-    edgeai_text5x7_draw_scaled(354, 196, 2, line, style->palette.accent_blue);
+    if (!gDynamicReady || gPrevPower != sample->power_mW)
+    {
+        snprintf(line, sizeof(line), "%4u MW", sample->power_mW);
+        edgeai_text5x7_draw_scaled(246, 298, 2, line, style->palette.text_primary);
+    }
+
+    if (!gDynamicReady || gPrevSoc != sample->soc_pct)
+    {
+        snprintf(line, sizeof(line), "%3u%%", sample->soc_pct);
+        edgeai_text5x7_draw_scaled(356, 74, 2, line, style->palette.text_primary);
+    }
+
+    if (!gDynamicReady || gPrevVoltage != sample->voltage_mV)
+    {
+        snprintf(line, sizeof(line), "%5u", sample->voltage_mV);
+        edgeai_text5x7_draw_scaled(356, 114, 2, line, style->palette.accent_blue);
+    }
+
+    gPrevCurrent = sample->current_mA;
+    gPrevPower = sample->power_mW;
+    gPrevVoltage = sample->voltage_mV;
+    gPrevSoc = sample->soc_pct;
 }

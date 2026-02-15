@@ -30,3 +30,6 @@ Format:
 - 2026-02-14 16:17:47 | patch src/gauge_render.c to static+dynamic redraw split | reduce full-screen raster flashing
 - 2026-02-14 16:17:47 | patch src/edgeai_ev_charger_monitor_demo.c to redraw only on sample change | lower visual flicker and unnecessary writes
 - 2026-02-14 16:17:47 | rebuild + flash build_ev_charger_try3 | deploy anti-flicker gauge renderer
+- 2026-02-14 16:20:08 | patch gauge_render layout and incremental redraw state | fix gauge/text overlap and reduce residual flicker
+- 2026-02-14 16:20:08 | patch power_data_source replay divider | slow gauge update cadence for stability
+- 2026-02-14 16:20:08 | rebuild + flash build_ev_charger_try3 | deploy overlap/flicker fixes

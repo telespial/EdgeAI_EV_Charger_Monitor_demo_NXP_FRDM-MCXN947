@@ -71,3 +71,11 @@ Project: `EdgeAI_EV_Charger_Monitor_demo_NXP_FRDM-MCXN947`
   - full-screen clear per frame removed
 - `src/edgeai_ev_charger_monitor_demo.c` now redraws only when sample values change.
 - Rebuilt and reflashed `build_ev_charger_try3` with anti-flicker update.
+
+## Update 2026-02-15
+- Fixed gauge/value text overlap by moving numeric readouts away from ring geometry.
+- Switched dynamic rendering to incremental updates:
+  - erase/redraw needle only when index changes
+  - clear/redraw value bands only when value changes
+- Slowed replay stepping (`POWER_REPLAY_TICK_DIVIDER`) to reduce gauge thrash.
+- Rebuilt and reflashed `build_ev_charger_try3`.

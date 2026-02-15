@@ -2,6 +2,8 @@
 
 #include "replay_trace_generated.h"
 
+#define POWER_REPLAY_TICK_DIVIDER 150000u
+
 typedef struct
 {
     power_data_source_mode_t mode;
@@ -72,7 +74,7 @@ void PowerData_Tick(void)
     }
 
     gPowerData.tick_divider++;
-    if (gPowerData.tick_divider < 20000u)
+    if (gPowerData.tick_divider < POWER_REPLAY_TICK_DIVIDER)
     {
         return;
     }
