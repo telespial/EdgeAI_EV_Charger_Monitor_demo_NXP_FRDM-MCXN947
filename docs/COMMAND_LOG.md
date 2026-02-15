@@ -108,3 +108,7 @@ Format:
 - 2026-02-14 17:38:27 | source tools/mcux_env.sh + install_mcux_overlay.sh + west build | compile upper-label/line symmetry update
 - 2026-02-14 17:38:27 | WS_DIR=... BUILD_DIR=... ./tools/flash_frdmmcxn947.sh | flash upper-label/line symmetry update
 - 2026-02-14 17:38:27 | update docs/PROJECT_STATE.md STATUS.md docs/COMMAND_LOG.md | record CURRENT/POWER symmetry change
+- 2026-02-14 17:40:23 | patch src/gauge_render.c | move CURRENT text further down and shift matching upper horizontal line
+- 2026-02-14 17:40:23 | source tools/mcux_env.sh + install_mcux_overlay.sh + west build | compile upper-label overlap fix
+- 2026-02-14 17:40:23 | WS_DIR=... BUILD_DIR=... ./tools/flash_frdmmcxn947.sh | flash upper-label overlap fix
+- 2026-02-14 17:40:23 | update docs/PROJECT_STATE.md STATUS.md docs/COMMAND_LOG.md | record upper label/line reposition

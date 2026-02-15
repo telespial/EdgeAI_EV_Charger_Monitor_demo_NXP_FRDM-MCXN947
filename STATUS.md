@@ -62,3 +62,6 @@ State: initialized
 - `CURRENT` label moved below upper gauge at the same relative distance as `POWER` below lower gauge.
 - Added corresponding upper horizontal guide line to match lower `POWER` treatment.
 - Firmware rebuilt and reflashed after label/line symmetry update.
+- `CURRENT` label moved farther down below upper gauge to avoid overlap.
+- Matching upper horizontal line shifted downward to align with updated label placement.
+- Firmware rebuilt and reflashed after upper-label/line reposition.
