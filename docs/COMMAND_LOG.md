@@ -156,3 +156,19 @@ Format:
 - 2026-02-14 18:38:40 | MCUX_EXAMPLES_DIR=.../mcuxsdk/examples ./sdk_example/install_mcux_overlay.sh + EDGEAI_EV_CHARGER_MONITOR_DEMO_ROOT=... west build -d .../build_ev_charger_try3 ... | compile temperature-bargraph update
 - 2026-02-14 18:38:40 | WS_DIR=... BUILD_DIR=... ./tools/flash_frdmmcxn947.sh | flash temperature-bargraph update to FRDM-MCXN947
 - 2026-02-14 18:38:40 | update docs/PROJECT_STATE.md STATUS.md docs/COMMAND_LOG.md | record temperature-bargraph and over-temp text update
+- 2026-02-14 19:22:10 | patch src/power_data_source.* + src/edgeai_ev_charger_monitor_demo.c + add src/real_telemetry.* | add real LPADC/OPAMP telemetry mode with replay fallback and 20 Hz UART CSV output
+- 2026-02-14 19:22:10 | patch CMake/prj.conf + add tools/capture_uart_telemetry.sh | wire telemetry sources into build and add one-command UART capture script
+- 2026-02-14 19:22:10 | MCUX_EXAMPLES_DIR=... ./sdk_example/install_mcux_overlay.sh + west build -d .../build_ev_charger_try3 ... | build telemetry-enabled firmware image
+- 2026-02-14 19:22:10 | WS_DIR=... BUILD_DIR=... ./tools/flash_frdmmcxn947.sh | flash attempt failed (LinkServer MEM-AP connect error; check target power/debug link)
+- 2026-02-14 19:22:10 | LinkServer flash --update-mode none ... load --addr 0x0 <bin> | direct flash retry failed with same MEM-AP connect error
+- 2026-02-14 19:22:10 | update docs/PROJECT_STATE.md STATUS.md docs/TODO.md README.md docs/COMMAND_LOG.md | record real telemetry implementation, build result, and flash blocker
+- 2026-02-14 19:44:21 | LinkServer flash --probe '#1' --update-mode none MCXN947:FRDM-MCXN947 load --addr 0x0 <build_ev_charger_try3 bin> | flash succeeded (telemetry-enabled firmware)
+- 2026-02-14 19:47:00 | patch runtime/render pipeline (`power_data_source.*`, `edgeai_ev_charger_monitor_demo.c`, `gauge_render.c`) | add 20Hz loop, elapsed charge clock, connector-wear anomaly scoring, and noisy scope traces
+- 2026-02-14 20:18:00 | add `tools/generate_ev_charge_profiles.py` + regenerate replay header | create 12-minute @20Hz EV datasets (normal/wear/fault) and set wear profile as default replay
+- 2026-02-14 20:19:00 | rebuild + LinkServer flash (`build_ev_charger_try3`) | deploy AI/wear + elapsed-clock dashboard update
+- 2026-02-14 20:22:00 | patch `src/gauge_render.c` + rebuild + flash | center-gauge position and elapsed label placement refinements
+- 2026-02-14 20:26:00 | patch `src/gauge_render.c` + rebuild + flash | center elapsed block in second section and tune center yellow
+- 2026-02-14 20:30:15 | copy built binary into `failsafe/` + generate sha256/metadata | create failsafe restore package for current flashed image
+- 2026-02-14 20:30:15 | `git tag -a GOLDEN_20260214_203015` + `git tag -a GOLDEN_LOCK_20260214_203015_22b87ce` | establish golden and lock restore tags
+- 2026-02-14 20:31:00 | update `START_HERE`/`RESTORE_POINTS`/`failsafe.md`/`PROJECT_STATE`/`STATUS`/`TODO` | finalize restore-point documentation and required rule updates
+- 2026-02-14 20:32:00 | update `README.md` and `docs/BUILD_FLASH.md` | align top-level docs with golden/failsafe baseline and project-local command rules

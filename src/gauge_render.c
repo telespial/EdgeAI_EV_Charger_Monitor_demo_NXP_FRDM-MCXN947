@@ -18,6 +18,9 @@ static uint16_t gPrevVoltage = 0u;
 static uint8_t gPrevSoc = 0u;
 static uint8_t gPrevTemp = 0u;
 static uint16_t gPrevCpuPct = 0u;
+static uint16_t gPrevAnomaly = 0u;
+static uint8_t gPrevWear = 0u;
+static uint32_t gPrevElapsedSim = 0u;
 static uint8_t gTraceCurrent[96];
 static uint8_t gTracePower[96];
 static uint8_t gTraceVoltage[96];
@@ -27,6 +30,7 @@ static uint32_t gFrameCounter = 0u;
 static uint8_t gPrevBarLevel = 255u;
 static uint8_t gPrevBarTemp = 255u;
 static bool gPrevOverTemp = false;
+static uint32_t gScopeNoiseSeed = 0x15B4A27Du;
 
 #define RGB565(r, g, b) (uint16_t)((((uint16_t)(r) & 0xF8u) << 8) | (((uint16_t)(g) & 0xFCu) << 3) | (((uint16_t)(b) & 0xF8u) >> 3))
 
@@ -37,7 +41,7 @@ enum
     PANEL_X1 = 462,
     PANEL_Y1 = 306,
     MAIN_CX = 236,
-    MAIN_CY = 170,
+    MAIN_CY = 182,
     MAIN_R = 84,
     MID_TOP_CX = 98,
     MID_TOP_CY = 110,
@@ -61,6 +65,7 @@ enum
     BAR_X1 = 47,
     BAR_Y1 = 288,
     BAR_SEGMENTS = 20,
+    SECTION2_CX = 240,
 };
 
 static int32_t ClampI32(int32_t v, int32_t lo, int32_t hi)
@@ -81,6 +86,12 @@ static uint8_t ScaleTo8(uint32_t value, uint32_t max_value)
         return 255u;
     }
     return (uint8_t)((value * 255u) / max_value);
+}
+
+static uint32_t NextNoise(void)
+{
+    gScopeNoiseSeed = (1103515245u * gScopeNoiseSeed) + 12345u;
+    return gScopeNoiseSeed;
 }
 
 static void DrawLine(int32_t x0, int32_t y0, int32_t x1, int32_t y1, int32_t width, uint16_t color)
@@ -194,12 +205,42 @@ static void DrawTerminalFrame(const gauge_style_preset_t *style)
     DrawLine(TERM_X + 6, TERM_Y + 16, TERM_X + TERM_W - 6, TERM_Y + 16, 1, RGB565(110, 20, 30));
 }
 
+static void DrawChargeClockDynamic(const gauge_style_preset_t *style, uint32_t elapsed_sim_s)
+{
+    uint32_t hh = elapsed_sim_s / 3600u;
+    uint32_t mm = (elapsed_sim_s % 3600u) / 60u;
+    uint32_t ss = elapsed_sim_s % 60u;
+    char line[20];
+    int32_t label_y = MAIN_CY + 30;
+    int32_t label_x;
+    int32_t value_x;
+
+    par_lcd_s035_fill_rect(SECTION2_CX - 38, MAIN_CY + 26, SECTION2_CX + 38, MAIN_CY + 50, RGB565(138, 112, 10));
+    label_x = SECTION2_CX - (edgeai_text5x7_width(1, "ELAPSED") / 2);
+    edgeai_text5x7_draw_scaled(label_x, label_y, 1, "ELAPSED", style->palette.text_secondary);
+    snprintf(line, sizeof(line), "%02u:%02u:%02u", (unsigned int)hh, (unsigned int)mm, (unsigned int)ss);
+    value_x = SECTION2_CX - (edgeai_text5x7_width(1, line) / 2);
+    edgeai_text5x7_draw_scaled(value_x, label_y + 10, 1, line, style->palette.text_primary);
+}
+
 static void DrawTerminalDynamic(const gauge_style_preset_t *style, const power_sample_t *sample, uint16_t cpu_pct)
 {
     char line[24];
-    uint16_t ai_color = (sample->temp_c >= 50u || sample->soc_pct <= 18u) ? style->palette.accent_red : style->palette.accent_green;
-    const char *ai_state = (ai_color == style->palette.accent_red) ? "ALERT" : "NORM";
+    uint16_t ai_color = style->palette.accent_green;
+    const char *ai_state = "NORM";
     const char *mode_state = "MODE REP";
+    uint16_t anomaly = sample->anomaly_score_pct;
+
+    if (anomaly >= 70u)
+    {
+        ai_color = style->palette.accent_red;
+        ai_state = "WEAR ALERT";
+    }
+    else if (anomaly >= 40u)
+    {
+        ai_color = RGB565(255, 180, 24);
+        ai_state = "WATCH";
+    }
 
     par_lcd_s035_fill_rect(TERM_X + 6, TERM_Y + 22, TERM_X + TERM_W - 6, TERM_Y + TERM_H - 6, RGB565(6, 9, 12));
 
@@ -217,11 +258,17 @@ static void DrawTerminalDynamic(const gauge_style_preset_t *style, const power_s
     snprintf(line, sizeof(line), "SOC %2u%%", sample->soc_pct);
     edgeai_text5x7_draw_scaled(TERM_X + 8, TERM_Y + 98, 1, line, style->palette.text_primary);
 
-    snprintf(line, sizeof(line), "CUR %3u", sample->current_mA);
+    snprintf(line, sizeof(line), "CUR %2u.%01uA", sample->current_mA / 1000u, (sample->current_mA % 1000u) / 100u);
     edgeai_text5x7_draw_scaled(TERM_X + 8, TERM_Y + 116, 1, line, style->palette.text_secondary);
 
-    snprintf(line, sizeof(line), "PWR %4u", sample->power_mW);
+    snprintf(line, sizeof(line), "PWR %5uW", sample->power_mW);
     edgeai_text5x7_draw_scaled(TERM_X + 8, TERM_Y + 134, 1, line, style->palette.text_secondary);
+
+    snprintf(line, sizeof(line), "WEAR %2u%%", sample->connector_wear_pct);
+    edgeai_text5x7_draw_scaled(TERM_X + 8, TERM_Y + 152, 1, line, ai_color);
+
+    snprintf(line, sizeof(line), "ANOM %2u%%", anomaly);
+    edgeai_text5x7_draw_scaled(TERM_X + 8, TERM_Y + 170, 1, line, ai_color);
 }
 
 static void DrawBatteryIndicatorFrame(const gauge_style_preset_t *style)
@@ -282,9 +329,12 @@ static void DrawScopeDynamic(const gauge_style_preset_t *style)
     for (i = 0; i < pw; i++)
     {
         uint8_t idx = (uint8_t)((gTraceHead + i) % (int32_t)(sizeof(gTraceCurrent)));
-        uint8_t white = (uint8_t)(baseline_white - ((gTracePower[idx] * (ph / 3)) / 255u));
-        uint8_t red = (uint8_t)(baseline_red - ((gTraceVoltage[idx] * (ph / 3)) / 255u));
-        uint8_t green = (uint8_t)((py0 + ph - 2) - ((gTraceCurrent[idx] * (ph - 4)) / 255u));
+        int32_t n0 = (int32_t)(NextNoise() & 0x3u) - 1;
+        int32_t n1 = (int32_t)(NextNoise() & 0x3u) - 1;
+        int32_t n2 = (int32_t)(NextNoise() & 0x3u) - 1;
+        uint8_t white = (uint8_t)ClampI32((int32_t)baseline_white - (int32_t)((gTracePower[idx] * (ph / 3)) / 255u) + n0, py0 + 1, py0 + ph - 2);
+        uint8_t red = (uint8_t)ClampI32((int32_t)baseline_red - (int32_t)((gTraceVoltage[idx] * (ph / 3)) / 255u) + n1, py0 + 1, py0 + ph - 2);
+        uint8_t green = (uint8_t)ClampI32((int32_t)(py0 + ph - 2) - (int32_t)((gTraceCurrent[idx] * (ph - 4)) / 255u) + n2, py0 + 1, py0 + ph - 2);
 
         if (i > 0)
         {
@@ -416,7 +466,7 @@ static void DrawStaticDashboard(const gauge_style_preset_t *style)
     DrawRing(MAIN_CX, MAIN_CY, MAIN_R + 10, 6, RGB565(20, 2, 4), RGB565(6, 2, 3));
     DrawRing(MAIN_CX, MAIN_CY, MAIN_R + 2, 10, RGB565(118, 6, 12), RGB565(26, 2, 5));
     DrawRing(MAIN_CX, MAIN_CY, MAIN_R - 10, 4, RGB565(210, 26, 32), RGB565(8, 8, 10));
-    DrawRing(MAIN_CX, MAIN_CY, MAIN_R - 14, 2, style->palette.text_primary, RGB565(78, 60, 10));
+    DrawRing(MAIN_CX, MAIN_CY, MAIN_R - 14, 2, style->palette.text_primary, RGB565(138, 112, 10));
 
     DrawRing(MID_TOP_CX, MID_TOP_CY, MID_R, 8, style->palette.text_primary, RGB565(6, 8, 10));
     DrawRing(MID_TOP_CX, MID_TOP_CY, MID_R - 8, 4, RGB565(34, 34, 36), RGB565(8, 8, 10));
@@ -433,6 +483,7 @@ static void DrawStaticDashboard(const gauge_style_preset_t *style)
     edgeai_text5x7_draw_scaled(MID_BOT_CX - 14, MID_BOT_CY + 50, 1, "POWER", style->palette.text_primary);
     brand_x = ((PANEL_X0 + PANEL_X1) / 2) - (edgeai_text5x7_width(2, "NXP EDGEAI") / 2);
     edgeai_text5x7_draw_scaled(brand_x, 286, 2, "NXP EDGEAI", RGB565(255, 208, 52));
+    DrawChargeClockDynamic(style, 0u);
 
     DrawBatteryIndicatorFrame(style);
     DrawScopeFrame(style);
@@ -441,7 +492,7 @@ static void DrawStaticDashboard(const gauge_style_preset_t *style)
 
 static void ClearDynamicValueBands(const gauge_style_preset_t *style)
 {
-    par_lcd_s035_fill_rect(MAIN_CX - 40, MAIN_CY - 10, MAIN_CX + 40, MAIN_CY + 16, RGB565(78, 60, 10));
+    par_lcd_s035_fill_rect(MAIN_CX - 40, MAIN_CY - 10, MAIN_CX + 40, MAIN_CY + 16, RGB565(138, 112, 10));
     par_lcd_s035_fill_rect(MID_TOP_CX - 24, MID_TOP_CY - 10, MID_TOP_CX + 24, MID_TOP_CY + 10, style->palette.panel_black);
     par_lcd_s035_fill_rect(MID_BOT_CX - 24, MID_BOT_CY - 10, MID_BOT_CX + 24, MID_BOT_CY + 10, style->palette.panel_black);
 }
@@ -466,6 +517,9 @@ bool GaugeRender_Init(void)
         gPrevBarLevel = 255u;
         gPrevBarTemp = 255u;
         gPrevOverTemp = false;
+        gPrevAnomaly = 0u;
+        gPrevWear = 0u;
+        gPrevElapsedSim = 0u;
     }
     return gLcdReady;
 }
@@ -497,21 +551,24 @@ void GaugeRender_DrawFrame(const power_sample_t *sample)
         gPrevBarLevel = 255u;
         gPrevBarTemp = 255u;
         gPrevOverTemp = false;
+        gPrevAnomaly = 0u;
+        gPrevWear = 0u;
+        gPrevElapsedSim = 0u;
     }
 
-    main_idx = ClampI32(((int32_t)sample->voltage_mV - 3600) / 55, 0, 12);
-    left_idx = ClampI32((int32_t)sample->current_mA / 20, 0, 10);
-    right_idx = ClampI32((int32_t)sample->power_mW / 260, 0, 10);
-    cpu_pct = (uint16_t)(22u + (sample->current_mA / 9u) + (sample->temp_c / 2u));
+    main_idx = ClampI32(((int32_t)sample->voltage_mV - 20000) / 420, 0, 12);
+    left_idx = ClampI32((int32_t)sample->current_mA / 4000, 0, 10);
+    right_idx = ClampI32((int32_t)sample->power_mW / 1000, 0, 10);
+    cpu_pct = (uint16_t)(20u + (sample->current_mA / 1400u) + (sample->temp_c / 2u));
     if (cpu_pct > 98u)
     {
         cpu_pct = 98u;
     }
     gFrameCounter++;
 
-    gTraceCurrent[gTraceHead] = ScaleTo8(sample->current_mA, 220u);
-    gTracePower[gTraceHead] = ScaleTo8(sample->power_mW, 2600u);
-    gTraceVoltage[gTraceHead] = ScaleTo8((sample->voltage_mV > 3500u) ? (sample->voltage_mV - 3500u) : 0u, 850u);
+    gTraceCurrent[gTraceHead] = ScaleTo8(sample->current_mA, 42000u);
+    gTracePower[gTraceHead] = ScaleTo8(sample->power_mW, 10000u);
+    gTraceVoltage[gTraceHead] = ScaleTo8((sample->voltage_mV > 20000u) ? (sample->voltage_mV - 20000u) : 0u, 5000u);
     gTraceHead = (uint8_t)((gTraceHead + 1u) % sizeof(gTraceCurrent));
     if (gTraceHead == 0u)
     {
@@ -567,14 +624,14 @@ void GaugeRender_DrawFrame(const power_sample_t *sample)
     if (!gDynamicReady || gPrevVoltage != sample->voltage_mV)
     {
         int32_t x;
-        snprintf(line, sizeof(line), "%4u", sample->voltage_mV);
+        snprintf(line, sizeof(line), "%3uV", sample->voltage_mV / 100u);
         x = MAIN_CX - (edgeai_text5x7_width(3, line) / 2);
         edgeai_text5x7_draw_scaled(x, MAIN_CY - 8, 3, line, style->palette.text_primary);
     }
 
     if (!gDynamicReady || gPrevCurrent != sample->current_mA)
     {
-        snprintf(line, sizeof(line), "%3u", sample->current_mA);
+        snprintf(line, sizeof(line), "%2u.%01u", sample->current_mA / 1000u, (sample->current_mA % 1000u) / 100u);
         edgeai_text5x7_draw_scaled(MID_TOP_CX - 20, MID_TOP_CY - 8, 2, line, style->palette.text_primary);
     }
 
@@ -591,9 +648,15 @@ void GaugeRender_DrawFrame(const power_sample_t *sample)
 
     if (!gDynamicReady || gPrevCurrent != sample->current_mA || gPrevPower != sample->power_mW ||
         gPrevVoltage != sample->voltage_mV || gPrevSoc != sample->soc_pct || gPrevTemp != sample->temp_c ||
-        gPrevCpuPct != cpu_pct || ((gFrameCounter % 16u) == 0u))
+        gPrevCpuPct != cpu_pct || gPrevAnomaly != sample->anomaly_score_pct || gPrevWear != sample->connector_wear_pct ||
+        ((gFrameCounter % 16u) == 0u))
     {
         DrawTerminalDynamic(style, sample, cpu_pct);
+    }
+
+    if ((!gDynamicReady) || ((sample->elapsed_charge_sim_s != gPrevElapsedSim) && ((sample->elapsed_charge_sim_s % 60u) == 0u)))
+    {
+        DrawChargeClockDynamic(style, sample->elapsed_charge_sim_s);
     }
 
     gPrevCurrent = sample->current_mA;
@@ -602,5 +665,8 @@ void GaugeRender_DrawFrame(const power_sample_t *sample)
     gPrevSoc = sample->soc_pct;
     gPrevTemp = sample->temp_c;
     gPrevCpuPct = cpu_pct;
+    gPrevAnomaly = sample->anomaly_score_pct;
+    gPrevWear = sample->connector_wear_pct;
+    gPrevElapsedSim = sample->elapsed_charge_sim_s;
     (void)gTraceReady;
 }

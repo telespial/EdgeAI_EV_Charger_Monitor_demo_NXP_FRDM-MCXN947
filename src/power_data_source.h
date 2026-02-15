@@ -11,6 +11,10 @@ typedef struct
     uint16_t voltage_mV;
     uint8_t soc_pct;
     uint8_t temp_c;
+    uint16_t anomaly_score_pct;
+    uint8_t connector_wear_pct;
+    uint32_t elapsed_charge_s;
+    uint32_t elapsed_charge_sim_s;
 } power_sample_t;
 
 typedef enum

@@ -11,9 +11,9 @@ Read in order:
 8. `docs/TODO.md`
 
 Current baseline:
-- Golden tag: not set
-- Lock tag: not set
-- Failsafe: `failsafe/.gitkeep` (placeholder)
+- Golden tag: `GOLDEN_20260214_203015`
+- Lock tag: `GOLDEN_LOCK_20260214_203015_22b87ce`
+- Failsafe: `failsafe/edgeai_ev_charger_monitor_demo_cm33_core0_GOLDEN_20260214_203015.bin`
 
 Primary objective:
 - implement stable EV charger monitor sensing, state model, and UI loop on FRDM-MCXN947.

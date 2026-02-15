@@ -8,12 +8,13 @@ Target hardware:
 - EV charger input sensing hardware (project-specific integration pending)
 
 ## Project Status
-- Repository initialized with self-contained docs, scripts, and MCUX SDK overlay wiring.
-- Firmware app is currently a bring-up baseline that prints a startup banner.
-- Gauge style baseline `cockpit_dark_v1` has been defined for a sports-cockpit look.
-- Replay-based test data pipeline is in place (`data/replay_trace.csv` -> `src/replay_trace_generated.h`).
-- First cockpit-style LCD dashboard render is implemented and flash-validated.
-- EV charger runtime logic is pending implementation.
+- 12-minute, 20 Hz EV charging profiles are in place (`normal`, `wear`, `fault`).
+- Runtime includes elapsed charge clock + connector-wear anomaly scoring for demo AI behavior.
+- Cockpit LCD dashboard is implemented and hardware flash-validated.
+- Golden restore point is established:
+  - `GOLDEN_20260214_203015`
+  - `GOLDEN_LOCK_20260214_203015_22b87ce`
+  - failsafe binary in `failsafe/`.
 
 ## Quickstart
 ```bash
@@ -40,4 +41,5 @@ Test-data references:
 Real capture references:
 - `docs/CAPTURE_MODE.md`
 - `tools/capture_energy_trace.sh`
+- `tools/capture_uart_telemetry.sh`
 - `tools/trace_convert.py`

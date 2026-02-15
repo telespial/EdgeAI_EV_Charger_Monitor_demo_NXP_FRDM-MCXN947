@@ -46,7 +46,7 @@ Project: `EdgeAI_EV_Charger_Monitor_demo_NXP_FRDM-MCXN947`
 - Imported display/text primitives (`src/par_lcd_s035.*`, `src/text5x7.*`) and expanded glyph coverage.
 - Updated demo startup loop to render live replay samples to LCD.
 - Build succeeded and flash completed via:
-  - workspace: `.../EdgeAI_sphere_demo.../mcuxsdk_ws`
+  - workspace: `./mcuxsdk_ws` (project-local override pattern)
   - build dir: `build_ev_charger_try3`
 
 ## Update 2026-02-15
@@ -275,3 +275,54 @@ Project: `EdgeAI_EV_Charger_Monitor_demo_NXP_FRDM-MCXN947`
   - bottom label below the lower horizontal line now shows `TEMP: XXC`
 - Added dynamic bottom temperature text update under the bargraph region.
 - Rebuilt and flashed successfully to FRDM-MCXN947 (LinkServer probe `#1`).
+
+## Update 2026-02-14
+- Added real telemetry backend in `src/real_telemetry.c` + `src/real_telemetry.h`:
+  - initializes OPAMP0 and LPADC (ADC0 command/trigger path)
+  - performs startup zero-offset calibration
+  - computes current/power from measured ADC delta and publishes `power_sample_t`
+- Extended `power_data_source` with `POWER_DATA_SOURCE_REAL_TELEMETRY` mode:
+  - selected automatically when telemetry init succeeds
+  - replay mode remains fallback if real telemetry is unavailable
+- Updated main loop to 20 Hz sampling cadence and structured UART CSV output:
+  - `TELEM_HEADER,...`
+  - `TELEM_CSV,t_ms,current_mA,power_mW,voltage_mV,temp_c,soc_pct,mode`
+- Added host capture utility `tools/capture_uart_telemetry.sh` for one-command UART CSV capture.
+- Build succeeded in workspace `build_ev_charger_try3`.
+- Flash attempt failed with LinkServer target-connect error (`Cannot find MEM-AP ... check target power`), so new image is built but not yet confirmed flashed on hardware.
+
+## Update 2026-02-15
+- Added synthetic EV charge profile generation tooling:
+  - `tools/generate_ev_charge_profiles.py`
+  - outputs 12-minute, 20 Hz traces with `1 min real = 1 hour simulated` charge progression.
+- Generated profile assets:
+  - `data/ev_charge_12min_normal_20hz.csv`
+  - `data/ev_charge_12min_wear_20hz.csv`
+  - `data/ev_charge_12min_fault_20hz.csv`
+- Set firmware replay source to wear profile via regenerated:
+  - `data/replay_trace.csv`
+  - `src/replay_trace_generated.h` (14400 samples).
+- Extended sample/runtime model with:
+  - `elapsed_charge_s`, `elapsed_charge_sim_s`
+  - `connector_wear_pct`
+  - `anomaly_score_pct`
+- Updated dashboard rendering (`src/gauge_render.c`):
+  - elapsed clock displayed inside center gauge bottom area
+  - elapsed block centered in second section
+  - oscilloscope traces include random noise jitter for realism
+  - center gauge yellow tone tuned per latest style requests
+- Updated main loop (`src/edgeai_ev_charger_monitor_demo.c`) to explicit 20 Hz cadence.
+- Rebuilt and flashed successfully after each layout/style refinement using LinkServer probe `#1`.
+
+## Update 2026-02-15 (Golden + Failsafe)
+- Created golden restore point tags:
+  - `GOLDEN_20260214_203015`
+  - `GOLDEN_LOCK_20260214_203015_22b87ce`
+- Created failsafe restore artifact package:
+  - `failsafe/edgeai_ev_charger_monitor_demo_cm33_core0_GOLDEN_20260214_203015.bin`
+  - `failsafe/edgeai_ev_charger_monitor_demo_cm33_core0_GOLDEN_20260214_203015.sha256`
+  - `failsafe/GOLDEN_20260214_203015_metadata.txt`
+- Updated restore documentation:
+  - `docs/START_HERE.md`
+  - `docs/RESTORE_POINTS.md`
+  - `docs/failsafe.md`

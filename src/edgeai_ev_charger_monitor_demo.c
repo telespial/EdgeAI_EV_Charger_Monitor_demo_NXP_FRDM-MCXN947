@@ -4,9 +4,13 @@
 #include "app.h"
 #include "board.h"
 #include "fsl_debug_console.h"
+#include "fsl_common.h"
+#include "fsl_clock.h"
 #include "gauge_style.h"
 #include "gauge_render.h"
 #include "power_data_source.h"
+
+#define POWER_SAMPLE_PERIOD_US 50000u
 
 int main(void)
 {
@@ -46,17 +50,21 @@ int main(void)
         }
 
         print_divider++;
-        if (print_divider < 200000u)
+        if (print_divider >= 20u)
         {
-            continue;
+            print_divider = 0u;
+            PRINTF("SAMPLE,mA=%u,mW=%u,mV=%u,SOC=%u,T=%u,AI=%u,WEAR=%u,sim_s=%u,mode=%s\r\n",
+                   s->current_mA,
+                   s->power_mW,
+                   s->voltage_mV,
+                   s->soc_pct,
+                   s->temp_c,
+                   s->anomaly_score_pct,
+                   s->connector_wear_pct,
+                   (unsigned int)s->elapsed_charge_sim_s,
+                   PowerData_ModeName());
         }
-        print_divider = 0u;
-        PRINTF("SAMPLE,mA=%u,mW=%u,mV=%u,SOC=%u,T=%u,mode=%s\r\n",
-               s->current_mA,
-               s->power_mW,
-               s->voltage_mV,
-               s->soc_pct,
-               s->temp_c,
-               PowerData_ModeName());
+
+        SDK_DelayAtLeastUs(POWER_SAMPLE_PERIOD_US, CLOCK_GetCoreSysClkFreq());
     }
 }

@@ -26,6 +26,16 @@ Outputs:
 - `captures/energy_capture_<timestamp>_uart.log`
 - `captures/energy_capture_<timestamp>_scenes.log`
 
+## 1b) Capture direct firmware telemetry CSV (no MCUX energy CLI)
+If firmware is running `real_telemetry` mode, capture UART output directly:
+
+```bash
+./tools/capture_uart_telemetry.sh --uart /dev/ttyACM0 --duration 60
+```
+
+Output:
+- `captures/uart_telemetry_<timestamp>.csv`
+
 ## 2) Convert energy CSV to replay CSV
 ```bash
 python3 tools/trace_convert.py \

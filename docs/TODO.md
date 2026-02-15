@@ -1,12 +1,13 @@
 # TODO
 
-- Implement EV charger telemetry acquisition module.
+- Tune LPADC current channel/gain constants in `src/real_telemetry.c` against bench measurements.
 - Integrate actual MCUX energy CLI command in `tools/capture_energy_trace.sh` (`ENERGY_CAPTURE_CMD`).
 - Add state model (idle/charging/fault/complete).
 - Tune cockpit gauge geometry/colors and optimize draw performance.
 - Add UI rendering and alarms.
 - Add UART/debug command path to update `PowerData_SetLiveOverride()` at runtime.
-- Capture baseline validation run and create first golden restore point.
+- Golden/failsafe restore point is now created; next step is to validate restore on a second board/session.
+- Add profile selector (normal/wear/fault) via UART command so demos can switch scenarios live.
 This is now a professional-grade demo architecture, not a hack.
 
 System Overview
@@ -382,3 +383,29 @@ Write the exact trace_convert.py structure
 Design the replay engine state machine
 
 Or produce a file-by-file project architecture ready for implementation
+
+Use AI here as an on-device anomaly detector and health predictor for EV charging, not just as UI graphics.
+
+Real-world AI uses you can show with this project:
+
+Fault detection
+Detect abnormal charging patterns (voltage sag, current spikes, unstable power).
+Output: NORMAL / WARNING / FAULT in terminal panel and color cues on gauges.
+Thermal risk prediction
+Predict overtemp before threshold is hit using trend (temp slope + power).
+Output: early warning like THERMAL RISK IN 30s.
+Cable/connector degradation hints
+Learn baseline charging signature, flag drift over time.
+Output: CHECK CONNECTOR RESISTANCE.
+Session quality scoring
+Score each charging session (efficiency, stability, interruptions).
+Output: Session Score: 87/100.
+How to apply in your current codebase:
+
+Keep your SAMPLE,... stream as input features.
+Add a lightweight feature window (last 5–10s): mean, stddev, slope, ripple.
+Run a tiny model/rule engine every 1s (isolation forest–style thresholding or compact classifier).
+Publish ai_status + anomaly_score to:
+right-side terminal text
+gauge accent colors
+UART log for validation

@@ -91,3 +91,26 @@ State: initialized
 - Left vertical bargraph now tracks temperature rather than current.
 - Added red over-temp state (`temp_c >= 70`) and bottom readout `TEMP: XXC` below the lower horizontal line.
 - Firmware rebuilt and reflashed after temp-bargraph wiring update.
+- Added real telemetry mode (`real_telemetry`) using onboard OPAMP + LPADC with startup zero calibration.
+- `power_data_source` now auto-selects real telemetry when available and falls back to replay otherwise.
+- Main loop now emits 20 Hz structured UART telemetry lines (`TELEM_CSV,...`) for host capture.
+- Added `tools/capture_uart_telemetry.sh` to capture firmware telemetry into CSV from `/dev/ttyACM*`.
+- Firmware build completed successfully for `build_ev_charger_try3`.
+- Flash attempt failed on current LinkServer/probe session with MEM-AP target-connect error (image built, not confirmed flashed).
+- Added EV charging profile generator `tools/generate_ev_charge_profiles.py`.
+- Generated 12-minute/20 Hz datasets with 12-hour-equivalent timeline:
+  - `data/ev_charge_12min_normal_20hz.csv`
+  - `data/ev_charge_12min_wear_20hz.csv`
+  - `data/ev_charge_12min_fault_20hz.csv`
+- Rebuilt replay source to wear profile and regenerated `src/replay_trace_generated.h`.
+- Added elapsed charge clock and connector-wear/anomaly AI fields into runtime sample model.
+- Updated dashboard:
+  - elapsed clock inside center gauge
+  - center-gauge yellow tuning
+  - centered elapsed block in second section
+  - noisy oscilloscope traces
+- Rebuilt and reflashed successfully (multiple UI refinements).
+- Created golden + failsafe restore point:
+  - `GOLDEN_20260214_203015`
+  - `GOLDEN_LOCK_20260214_203015_22b87ce`
+  - `failsafe/edgeai_ev_charger_monitor_demo_cm33_core0_GOLDEN_20260214_203015.bin`
