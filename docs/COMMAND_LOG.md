@@ -148,3 +148,7 @@ Format:
 - 2026-02-14 18:00:22 | MCUX_EXAMPLES_DIR=.../mcuxsdk/examples ./sdk_example/install_mcux_overlay.sh + EDGEAI_EV_CHARGER_MONITOR_DEMO_ROOT=... west build -d .../build_ev_charger_try3 ... | compile darker center update
 - 2026-02-14 18:00:22 | WS_DIR=... BUILD_DIR=... ./tools/flash_frdmmcxn947.sh | flash darker center update to FRDM-MCXN947
 - 2026-02-14 18:00:22 | update docs/PROJECT_STATE.md STATUS.md docs/COMMAND_LOG.md | record darker center update
+- 2026-02-14 18:06:45 | patch src/gauge_render.c | replace left green box with dynamic 20-segment current bargraph (green/yellow/red thresholds)
+- 2026-02-14 18:06:45 | MCUX_EXAMPLES_DIR=.../mcuxsdk/examples ./sdk_example/install_mcux_overlay.sh + EDGEAI_EV_CHARGER_MONITOR_DEMO_ROOT=... west build -d .../build_ev_charger_try3 ... | compile left-bargraph update
+- 2026-02-14 18:06:45 | WS_DIR=... BUILD_DIR=... ./tools/flash_frdmmcxn947.sh | flash left-bargraph update to FRDM-MCXN947
+- 2026-02-14 18:06:45 | update docs/PROJECT_STATE.md STATUS.md docs/COMMAND_LOG.md | record left-bargraph update

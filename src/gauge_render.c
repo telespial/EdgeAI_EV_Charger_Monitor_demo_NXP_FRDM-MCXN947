@@ -24,6 +24,7 @@ static uint8_t gTraceVoltage[96];
 static uint8_t gTraceHead = 0u;
 static bool gTraceReady = false;
 static uint32_t gFrameCounter = 0u;
+static uint8_t gPrevBarLevel = 255u;
 
 #define RGB565(r, g, b) (uint16_t)((((uint16_t)(r) & 0xF8u) << 8) | (((uint16_t)(g) & 0xFCu) << 3) | (((uint16_t)(b) & 0xF8u) >> 3))
 
@@ -53,6 +54,11 @@ enum
     TERM_Y = 124,
     TERM_W = 128,
     TERM_H = 176,
+    BAR_X0 = 22,
+    BAR_Y0 = 78,
+    BAR_X1 = 47,
+    BAR_Y1 = 288,
+    BAR_SEGMENTS = 20,
 };
 
 static int32_t ClampI32(int32_t v, int32_t lo, int32_t hi)
@@ -291,6 +297,85 @@ static void DrawScopeDynamic(const gauge_style_preset_t *style)
     }
 }
 
+static void DrawLeftBargraphFrame(const gauge_style_preset_t *style)
+{
+    int32_t i;
+    int32_t inner_x0 = BAR_X0 + 2;
+    int32_t inner_x1 = BAR_X1 - 2;
+    int32_t inner_y0 = BAR_Y0 + 2;
+    int32_t inner_y1 = BAR_Y1 - 2;
+    int32_t seg_step = (inner_y1 - inner_y0 + 1) / BAR_SEGMENTS;
+
+    par_lcd_s035_fill_rect(BAR_X0, BAR_Y0, BAR_X1, BAR_Y1, RGB565(8, 14, 10));
+    par_lcd_s035_fill_rect(inner_x0, inner_y0, inner_x1, inner_y1, RGB565(4, 8, 6));
+    DrawLine(BAR_X0, BAR_Y0, BAR_X1, BAR_Y0, 1, style->palette.text_primary);
+    DrawLine(BAR_X1, BAR_Y0, BAR_X1, BAR_Y1, 1, style->palette.text_primary);
+    DrawLine(BAR_X0, BAR_Y1, BAR_X1, BAR_Y1, 1, style->palette.text_primary);
+
+    for (i = 1; i < BAR_SEGMENTS; i++)
+    {
+        int32_t y = inner_y1 - (i * seg_step);
+        DrawLine(inner_x0, y, inner_x1, y, 1, RGB565(18, 28, 20));
+    }
+}
+
+static void DrawLeftBargraphDynamic(const gauge_style_preset_t *style, uint16_t current_mA)
+{
+    int32_t i;
+    int32_t level = ClampI32(((int32_t)current_mA * BAR_SEGMENTS) / 220, 0, BAR_SEGMENTS);
+    int32_t inner_x0 = BAR_X0 + 3;
+    int32_t inner_x1 = BAR_X1 - 3;
+    int32_t inner_y0 = BAR_Y0 + 3;
+    int32_t inner_y1 = BAR_Y1 - 3;
+    int32_t inner_h = (inner_y1 - inner_y0 + 1);
+    int32_t seg_step = inner_h / BAR_SEGMENTS;
+
+    if ((uint8_t)level == gPrevBarLevel)
+    {
+        return;
+    }
+
+    for (i = 0; i < BAR_SEGMENTS; i++)
+    {
+        int32_t seg_top = inner_y1 - ((i + 1) * seg_step) + 2;
+        int32_t seg_bot = inner_y1 - (i * seg_step) - 1;
+        uint16_t color = RGB565(8, 14, 10);
+
+        if (seg_top < inner_y0)
+        {
+            seg_top = inner_y0;
+        }
+        if (seg_bot > inner_y1)
+        {
+            seg_bot = inner_y1;
+        }
+        if (seg_top > seg_bot)
+        {
+            continue;
+        }
+
+        if (i < level)
+        {
+            if (i < (BAR_SEGMENTS / 2))
+            {
+                color = style->palette.accent_green;
+            }
+            else if (i < ((BAR_SEGMENTS * 4) / 5))
+            {
+                color = RGB565(175, 150, 24);
+            }
+            else
+            {
+                color = style->palette.accent_red;
+            }
+        }
+
+        par_lcd_s035_fill_rect(inner_x0, seg_top, inner_x1, seg_bot, color);
+    }
+
+    gPrevBarLevel = (uint8_t)level;
+}
+
 static void DrawStaticDashboard(const gauge_style_preset_t *style)
 {
     int32_t brand_x;
@@ -300,8 +385,8 @@ static void DrawStaticDashboard(const gauge_style_preset_t *style)
     par_lcd_s035_fill_rect(PANEL_X0 + 4, PANEL_Y0 + 4, PANEL_X1 - 4, PANEL_Y0 + 30, RGB565(8, 10, 13));
     edgeai_text5x7_draw_scaled(PANEL_X0 + 14, PANEL_Y0 + 14, 1, "(c)RICHARD HABERKERN", style->palette.text_secondary);
 
-    /* Left status accent bar: full vertical run up to the white guide line. */
-    par_lcd_s035_fill_rect(22, 78, 47, 288, style->palette.accent_green);
+    /* Left status bargraph aligned to the existing guide structure. */
+    DrawLeftBargraphFrame(style);
     DrawLine(22, 78, 48, 78, 1, style->palette.text_primary);
     DrawLine(48, 78, 48, 258, 1, style->palette.text_primary);
     DrawLine(48, 164, 72, 164, 1, style->palette.text_primary);
@@ -361,6 +446,7 @@ bool GaugeRender_Init(void)
         gTraceHead = 0u;
         gTraceReady = false;
         gFrameCounter = 0u;
+        gPrevBarLevel = 255u;
     }
     return gLcdReady;
 }
@@ -389,6 +475,7 @@ void GaugeRender_DrawFrame(const power_sample_t *sample)
         gPrevMainIdx = -1;
         gPrevLeftIdx = -1;
         gPrevRightIdx = -1;
+        gPrevBarLevel = 255u;
     }
 
     main_idx = ClampI32(((int32_t)sample->voltage_mV - 3600) / 55, 0, 12);
@@ -448,6 +535,7 @@ void GaugeRender_DrawFrame(const power_sample_t *sample)
     }
 
     DrawScopeDynamic(style);
+    DrawLeftBargraphDynamic(style, sample->current_mA);
 
     if (!gDynamicReady || gPrevCurrent != sample->current_mA || gPrevPower != sample->power_mW ||
         gPrevVoltage != sample->voltage_mV || gPrevSoc != sample->soc_pct)

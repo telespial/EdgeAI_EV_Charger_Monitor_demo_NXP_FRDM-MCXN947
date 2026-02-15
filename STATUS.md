@@ -85,3 +85,6 @@ State: initialized
 - Firmware rebuilt and reflashed after dark-yellow center update.
 - Large gauge center dark-yellow tone reduced further for a deeper look.
 - Firmware rebuilt and reflashed after darker center update.
+- Left vertical green box converted into a live segmented bargraph.
+- Bargraph level now updates from current draw with green/yellow/red bands.
+- Firmware rebuilt and reflashed after bargraph update.
