@@ -83,3 +83,5 @@ State: initialized
 - Firmware rebuilt and reflashed after yellow-center update.
 - Large gauge center yellow changed to a very dark yellow tone.
 - Firmware rebuilt and reflashed after dark-yellow center update.
+- Large gauge center dark-yellow tone reduced further for a deeper look.
+- Firmware rebuilt and reflashed after darker center update.

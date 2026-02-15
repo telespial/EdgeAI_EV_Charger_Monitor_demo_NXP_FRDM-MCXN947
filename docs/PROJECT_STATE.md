@@ -256,3 +256,8 @@ Project: `EdgeAI_EV_Charger_Monitor_demo_NXP_FRDM-MCXN947`
 - Darkened the large gauge center fill to a very dark yellow for a deeper cockpit look.
 - Updated `src/gauge_render.c` main center fill and center value-band clear color to `RGB565(120, 95, 18)`.
 - Rebuilt and flashed successfully to FRDM-MCXN947 (LinkServer probe `#1`).
+
+## Update 2026-02-14
+- Darkened the large gauge center fill again to an even deeper yellow tone.
+- Updated `src/gauge_render.c` center-base and dynamic center clear color to `RGB565(78, 60, 10)`.
+- Rebuilt and flashed successfully to FRDM-MCXN947 (LinkServer probe `#1`).

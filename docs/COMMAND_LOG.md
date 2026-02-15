@@ -144,3 +144,7 @@ Format:
 - 2026-02-14 17:59:35 | MCUX_EXAMPLES_DIR=.../mcuxsdk/examples ./sdk_example/install_mcux_overlay.sh + EDGEAI_EV_CHARGER_MONITOR_DEMO_ROOT=... west build -d .../build_ev_charger_try3 ... | compile dark-yellow center update
 - 2026-02-14 17:59:35 | WS_DIR=... BUILD_DIR=... ./tools/flash_frdmmcxn947.sh | flash dark-yellow center update to FRDM-MCXN947
 - 2026-02-14 17:59:35 | update docs/PROJECT_STATE.md STATUS.md docs/COMMAND_LOG.md | record dark-yellow center update
+- 2026-02-14 18:00:22 | patch src/gauge_render.c | darken large-gauge center fill again to RGB565(78, 60, 10) for both base and center value-band clear
+- 2026-02-14 18:00:22 | MCUX_EXAMPLES_DIR=.../mcuxsdk/examples ./sdk_example/install_mcux_overlay.sh + EDGEAI_EV_CHARGER_MONITOR_DEMO_ROOT=... west build -d .../build_ev_charger_try3 ... | compile darker center update
+- 2026-02-14 18:00:22 | WS_DIR=... BUILD_DIR=... ./tools/flash_frdmmcxn947.sh | flash darker center update to FRDM-MCXN947
+- 2026-02-14 18:00:22 | update docs/PROJECT_STATE.md STATUS.md docs/COMMAND_LOG.md | record darker center update
