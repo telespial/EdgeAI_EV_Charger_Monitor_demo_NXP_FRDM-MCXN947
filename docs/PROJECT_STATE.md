@@ -93,3 +93,8 @@ Project: `EdgeAI_EV_Charger_Monitor_demo_NXP_FRDM-MCXN947`
   - `data/ev_charging_demo_5min.csv` (300 samples, 1 Hz)
   - includes voltage/current/power/SOC/thermal/insulation/pilot/frequency/ripple metrics
   - includes labeled anomalies: `CURRENT_SPIKE`, `VOLTAGE_SAG`, `THERMAL_RISE`, `INSULATION_DROP`, `PILOT_NOISE`
+
+## Update 2026-02-15
+- Overwrote `data/ev_charging_demo_5min.csv` with 20 Hz telemetry:
+  - 6000 rows over 300 seconds (`timestamp_s` from `0.000` to `299.950`)
+  - same metrics and anomaly labels retained

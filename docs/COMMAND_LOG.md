@@ -40,3 +40,6 @@ Format:
 - 2026-02-14 16:28:00 | generate data/ev_charging_demo_5min.csv (python) | create 5-minute EV telemetry demo set with anomaly labels
 - 2026-02-14 16:28:00 | validate generated CSV row count and anomaly distribution | confirm dataset integrity for AI testing
 - 2026-02-14 16:28:00 | update STATUS.md and docs/PROJECT_STATE.md | record synthetic telemetry dataset addition
+- 2026-02-14 16:31:58 | overwrite data/ev_charging_demo_5min.csv with 20Hz synthetic telemetry | increase sampling from 1Hz to 20Hz for 5-minute dataset
+- 2026-02-14 16:31:58 | validate CSV row count/time span/anomaly distribution | confirm 6000-row dataset integrity
+- 2026-02-14 16:31:58 | update STATUS.md and docs/PROJECT_STATE.md | record dataset sampling-rate change

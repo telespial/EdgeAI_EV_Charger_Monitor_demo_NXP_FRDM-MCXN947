@@ -19,3 +19,4 @@ State: initialized
 - Gauge/text overlap fixed and dynamic updates now use per-value/per-needle incremental redraw.
 - Added real-data capture pipeline scripts for MCUX energy tooling and replay conversion.
 - Added synthetic 5-minute EV charging telemetry dataset with labeled anomaly windows.
+- Synthetic EV dataset updated to 20 Hz sampling (6000 rows over 5 minutes).
