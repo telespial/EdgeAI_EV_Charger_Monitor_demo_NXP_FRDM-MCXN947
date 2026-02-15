@@ -177,6 +177,7 @@ static void DrawScopeFrame(const gauge_style_preset_t *style)
     par_lcd_s035_fill_rect(SCOPE_X, SCOPE_Y, SCOPE_X + SCOPE_W, SCOPE_Y + SCOPE_H, style->palette.bezel_dark);
     par_lcd_s035_fill_rect(SCOPE_X + 2, SCOPE_Y + 2, SCOPE_X + SCOPE_W - 2, SCOPE_Y + SCOPE_H - 2, RGB565(7, 10, 12));
     edgeai_text5x7_draw_scaled(SCOPE_X + 8, SCOPE_Y + 6, 1, "20HZ TRACE", style->palette.needle_amber);
+    edgeai_text5x7_draw_scaled(SCOPE_X + 34, SCOPE_Y + SCOPE_H - 11, 1, "NXP EDGE AI", style->palette.needle_amber);
 }
 
 static void DrawTerminalFrame(const gauge_style_preset_t *style)
@@ -228,7 +229,7 @@ static void DrawScopeDynamic(const gauge_style_preset_t *style)
     int32_t baseline_red = py0 + (ph * 2) / 5;
     uint8_t prev_white = 0u;
     uint8_t prev_red = 0u;
-    uint8_t prev_yellow = 0u;
+    uint8_t prev_green = 0u;
 
     par_lcd_s035_fill_rect(px0, py0, px0 + pw, py0 + ph, RGB565(4, 6, 8));
     DrawLine(px0, baseline_white, px0 + pw, baseline_white, 1, style->palette.text_primary);
@@ -239,18 +240,18 @@ static void DrawScopeDynamic(const gauge_style_preset_t *style)
         uint8_t idx = (uint8_t)((gTraceHead + i) % (int32_t)(sizeof(gTraceCurrent)));
         uint8_t white = (uint8_t)(baseline_white - ((gTracePower[idx] * (ph / 3)) / 255u));
         uint8_t red = (uint8_t)(baseline_red - ((gTraceVoltage[idx] * (ph / 3)) / 255u));
-        uint8_t yellow = (uint8_t)((py0 + ph - 2) - ((gTraceCurrent[idx] * (ph - 4)) / 255u));
+        uint8_t green = (uint8_t)((py0 + ph - 2) - ((gTraceCurrent[idx] * (ph - 4)) / 255u));
 
         if (i > 0)
         {
             DrawLine(px0 + i - 1, prev_white, px0 + i, white, 1, style->palette.text_primary);
             DrawLine(px0 + i - 1, prev_red, px0 + i, red, 1, style->palette.accent_red);
-            DrawLine(px0 + i - 1, prev_yellow, px0 + i, yellow, 1, style->palette.needle_amber);
+            DrawLine(px0 + i - 1, prev_green, px0 + i, green, 1, style->palette.accent_green);
         }
 
         prev_white = white;
         prev_red = red;
-        prev_yellow = yellow;
+        prev_green = green;
     }
 }
 

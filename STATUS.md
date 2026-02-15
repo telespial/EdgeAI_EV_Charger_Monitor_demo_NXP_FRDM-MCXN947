@@ -26,3 +26,6 @@ State: initialized
 - LCD layout now uses 3 vertical quadrants with gauge cluster in left/middle and scope + status terminal in right quadrant.
 - Added lower-right text terminal block showing CPU usage, AI status, mode, temp, SOC, current, and power.
 - Rebuilt and reflashed firmware after quadrant layout update.
+- Scope colors updated to red/white/green with yellow bottom title `NXP EDGE AI`.
+- Added font glyph `X` for dashboard title rendering.
+- Firmware rebuilt and reflashed after scope style update.

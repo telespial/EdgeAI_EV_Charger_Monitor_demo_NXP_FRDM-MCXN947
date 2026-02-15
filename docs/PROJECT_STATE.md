@@ -119,3 +119,10 @@ Project: `EdgeAI_EV_Charger_Monitor_demo_NXP_FRDM-MCXN947`
   - Quadrant 3 (bottom): text terminal status panel
 - Added terminal telemetry text in lower-right panel: CPU %, AI state, mode, temperature, SOC, current, and power.
 - Rebuilt and flashed successfully to FRDM-MCXN947 using LinkServer probe `#1`.
+
+## Update 2026-02-15
+- Updated oscilloscope styling in `src/gauge_render.c`:
+  - traces now render as white + red + green
+  - bottom scope title text now renders in yellow as `NXP EDGE AI`
+- Added `X` glyph support in `src/text5x7.c` for scope title rendering.
+- Rebuilt and flashed successfully to FRDM-MCXN947 (LinkServer probe `#1`).
