@@ -53,3 +53,7 @@ State: initialized
 - `POWER` label moved lower, beneath the lower small gauge.
 - Increased space between small gauges (position and radius adjustments).
 - Firmware rebuilt and reflashed after layout refinements.
+- Centered main numeric text in large gauge.
+- Moved `POWER` label beneath lower small gauge.
+- Increased vertical spacing between small gauges and reduced small-gauge size.
+- Firmware rebuilt and reflashed after layout adjustment.

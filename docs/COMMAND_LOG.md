@@ -96,3 +96,7 @@ Format:
 - 2026-02-14 17:33:51 | source tools/mcux_env.sh + install_mcux_overlay.sh + west build | compile gauge spacing/alignment update
 - 2026-02-14 17:33:51 | WS_DIR=... BUILD_DIR=... ./tools/flash_frdmmcxn947.sh | flash spacing/alignment update
 - 2026-02-14 17:33:51 | update docs/PROJECT_STATE.md STATUS.md docs/COMMAND_LOG.md | record spacing and label placement changes
+- 2026-02-14 17:35:34 | patch src/gauge_render.c | center main gauge number, move POWER label lower, increase small-gauge spacing
+- 2026-02-14 17:35:34 | source tools/mcux_env.sh + install_mcux_overlay.sh + west build | compile gauge spacing/label alignment update
+- 2026-02-14 17:35:34 | WS_DIR=... BUILD_DIR=... ./tools/flash_frdmmcxn947.sh | flash spacing/label alignment update
+- 2026-02-14 17:35:34 | update docs/PROJECT_STATE.md STATUS.md docs/COMMAND_LOG.md | record gauge spacing and label updates
