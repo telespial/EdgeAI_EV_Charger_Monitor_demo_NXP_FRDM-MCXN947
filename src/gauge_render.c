@@ -300,11 +300,11 @@ static void DrawStaticDashboard(const gauge_style_preset_t *style)
     par_lcd_s035_fill_rect(PANEL_X0 + 4, PANEL_Y0 + 4, PANEL_X1 - 4, PANEL_Y0 + 30, RGB565(8, 10, 13));
     edgeai_text5x7_draw_scaled(PANEL_X0 + 14, PANEL_Y0 + 14, 1, "(c)RICHARD HABERKERN", style->palette.text_secondary);
 
-    DrawLine(22, 78, 56, 78, 1, style->palette.text_primary);
-    DrawLine(56, 78, 56, 258, 1, style->palette.text_primary);
-    DrawLine(56, 164, 80, 164, 1, style->palette.text_primary);
-    DrawLine(56, 258, 56, 288, 1, style->palette.text_primary);
-    DrawLine(56, 288, 80, 288, 1, style->palette.text_primary);
+    DrawLine(22, 78, 48, 78, 1, style->palette.text_primary);
+    DrawLine(48, 78, 48, 258, 1, style->palette.text_primary);
+    DrawLine(48, 164, 72, 164, 1, style->palette.text_primary);
+    DrawLine(48, 258, 48, 288, 1, style->palette.text_primary);
+    DrawLine(48, 288, 72, 288, 1, style->palette.text_primary);
     DrawLine(448, 78, 414, 78, 1, style->palette.text_primary);
     DrawLine(414, 78, 414, 258, 1, style->palette.text_primary);
     DrawLine(414, 258, 338, 258, 1, style->palette.text_primary);
@@ -323,7 +323,7 @@ static void DrawStaticDashboard(const gauge_style_preset_t *style)
     DrawGaugeTicks11(MID_TOP_CX, MID_TOP_CY, MID_R - 12, style->palette.text_primary, RGB565(140, 140, 145));
     DrawGaugeTicks11(MID_BOT_CX, MID_BOT_CY, MID_R - 12, style->palette.text_primary, RGB565(140, 140, 145));
 
-    edgeai_text5x7_draw_scaled(MID_TOP_CX - 18, MID_TOP_CY + 44, 1, "CURRENT", style->palette.text_primary);
+    edgeai_text5x7_draw_scaled(MID_TOP_CX - 18, MID_TOP_CY + 50, 1, "CURRENT", style->palette.text_primary);
     edgeai_text5x7_draw_scaled(MID_BOT_CX - 14, MID_BOT_CY + 50, 1, "POWER", style->palette.text_primary);
     brand_x = ((PANEL_X0 + PANEL_X1) / 2) - (edgeai_text5x7_width(2, "NXP EDGEAI") / 2);
     edgeai_text5x7_draw_scaled(brand_x, 286, 2, "NXP EDGEAI", RGB565(255, 208, 52));

@@ -217,3 +217,8 @@ Project: `EdgeAI_EV_Charger_Monitor_demo_NXP_FRDM-MCXN947`
   - moved `CURRENT` text upward/downward balance to clear gauge overlap
   - aligned the short upper horizontal guide to avoid text collisions
 - Rebuilt and flashed successfully to FRDM-MCXN947.
+
+## Update 2026-02-15
+- Shifted left vertical guide line further left to increase separation from the small gauges.
+- Realigned `CURRENT` text to match line relationship used by `POWER` (text offset relative to short horizontal guide).
+- Rebuilt and flashed successfully to FRDM-MCXN947.

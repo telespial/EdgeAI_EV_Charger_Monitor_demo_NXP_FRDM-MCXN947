@@ -67,3 +67,6 @@ State: initialized
 - Firmware rebuilt and reflashed after upper-label/line reposition.
 - Adjusted `CURRENT` label and upper short horizontal line to eliminate overlap with gauge/text.
 - Firmware rebuilt and reflashed after CURRENT/line cleanup.
+- Left vertical guide moved left for more gauge spacing.
+- `CURRENT` text aligned with its short horizontal line using same offset pattern as `POWER`.
+- Firmware rebuilt and reflashed after guide/text alignment update.

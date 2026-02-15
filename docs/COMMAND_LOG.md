@@ -116,3 +116,7 @@ Format:
 - 2026-02-14 17:41:53 | source tools/mcux_env.sh + install_mcux_overlay.sh + west build | compile CURRENT/line overlap fix
 - 2026-02-14 17:41:53 | WS_DIR=... BUILD_DIR=... ./tools/flash_frdmmcxn947.sh | flash CURRENT/line overlap fix
 - 2026-02-14 17:41:53 | update docs/PROJECT_STATE.md STATUS.md docs/COMMAND_LOG.md | record CURRENT/line overlap cleanup
+- 2026-02-14 17:43:52 | patch src/gauge_render.c | move left vertical guide left and align CURRENT label with short line offset
+- 2026-02-14 17:43:52 | source tools/mcux_env.sh + install_mcux_overlay.sh + west build | compile guide/label alignment update
+- 2026-02-14 17:43:52 | WS_DIR=... BUILD_DIR=... ./tools/flash_frdmmcxn947.sh | flash guide/label alignment update
+- 2026-02-14 17:43:52 | update docs/PROJECT_STATE.md STATUS.md docs/COMMAND_LOG.md | record vertical-line spacing and CURRENT alignment changes
