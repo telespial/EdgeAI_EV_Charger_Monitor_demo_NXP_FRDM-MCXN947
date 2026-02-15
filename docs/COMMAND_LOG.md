@@ -80,3 +80,7 @@ Format:
 - 2026-02-14 17:27:58 | source tools/mcux_env.sh + install_mcux_overlay.sh + west build | compile gauge arc geometry fix
 - 2026-02-14 17:27:58 | WS_DIR=... BUILD_DIR=... ./tools/flash_frdmmcxn947.sh | flash gauge arc geometry fix
 - 2026-02-14 17:27:58 | update docs/PROJECT_STATE.md STATUS.md docs/COMMAND_LOG.md | record arc-geometry correction
+- 2026-02-14 17:29:05 | patch src/gauge_render.c tick radii | move gauge hashmark dots inward inside ring lines
+- 2026-02-14 17:29:05 | source tools/mcux_env.sh + install_mcux_overlay.sh + west build | compile inward tick-dot adjustment
+- 2026-02-14 17:29:05 | WS_DIR=... BUILD_DIR=... ./tools/flash_frdmmcxn947.sh | flash inward tick-dot adjustment
+- 2026-02-14 17:29:05 | update docs/PROJECT_STATE.md STATUS.md docs/COMMAND_LOG.md | record inward tick-dot placement change

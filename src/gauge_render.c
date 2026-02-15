@@ -317,9 +317,9 @@ static void DrawStaticDashboard(const gauge_style_preset_t *style)
     DrawRing(MID_BOT_CX, MID_BOT_CY, MID_R, 8, style->palette.text_primary, RGB565(6, 8, 10));
     DrawRing(MID_BOT_CX, MID_BOT_CY, MID_R - 8, 4, RGB565(34, 34, 36), RGB565(8, 8, 10));
 
-    DrawGaugeTicks13(MAIN_CX, MAIN_CY, MAIN_R - 6, style->palette.text_primary, RGB565(170, 170, 176));
-    DrawGaugeTicks11(MID_TOP_CX, MID_TOP_CY, MID_R - 4, style->palette.text_primary, RGB565(140, 140, 145));
-    DrawGaugeTicks11(MID_BOT_CX, MID_BOT_CY, MID_R - 4, style->palette.text_primary, RGB565(140, 140, 145));
+    DrawGaugeTicks13(MAIN_CX, MAIN_CY, MAIN_R - 18, style->palette.text_primary, RGB565(170, 170, 176));
+    DrawGaugeTicks11(MID_TOP_CX, MID_TOP_CY, MID_R - 12, style->palette.text_primary, RGB565(140, 140, 145));
+    DrawGaugeTicks11(MID_BOT_CX, MID_BOT_CY, MID_R - 12, style->palette.text_primary, RGB565(140, 140, 145));
 
     DrawLine(MAIN_CX + 56, MAIN_CY - 46, MAIN_CX + 78, MAIN_CY - 14, 2, style->palette.accent_red);
     DrawLine(MAIN_CX + 58, MAIN_CY - 35, MAIN_CX + 82, MAIN_CY - 3, 2, style->palette.accent_red);
@@ -432,7 +432,7 @@ void GaugeRender_DrawFrame(const power_sample_t *sample)
         if (gPrevMainIdx != main_idx)
         {
             DrawNeedle13(MAIN_CX, MAIN_CY, MAIN_R - 10, gPrevMainIdx, style->palette.panel_black, 3);
-            DrawGaugeTicks13(MAIN_CX, MAIN_CY, MAIN_R - 6, style->palette.text_primary, RGB565(170, 170, 176));
+            DrawGaugeTicks13(MAIN_CX, MAIN_CY, MAIN_R - 18, style->palette.text_primary, RGB565(170, 170, 176));
             DrawNeedle13(MAIN_CX, MAIN_CY, MAIN_R - 10, main_idx, style->palette.text_primary, 3);
             DrawNeedle13(MAIN_CX, MAIN_CY, MAIN_R - 16, main_idx, style->palette.accent_red, 1);
             gPrevMainIdx = main_idx;
@@ -440,14 +440,14 @@ void GaugeRender_DrawFrame(const power_sample_t *sample)
         if (gPrevLeftIdx != left_idx)
         {
             DrawNeedle11(MID_TOP_CX, MID_TOP_CY, MID_R - 9, gPrevLeftIdx, style->palette.panel_black, 2);
-            DrawGaugeTicks11(MID_TOP_CX, MID_TOP_CY, MID_R - 4, style->palette.text_primary, RGB565(140, 140, 145));
+            DrawGaugeTicks11(MID_TOP_CX, MID_TOP_CY, MID_R - 12, style->palette.text_primary, RGB565(140, 140, 145));
             DrawNeedle11(MID_TOP_CX, MID_TOP_CY, MID_R - 9, left_idx, style->palette.text_primary, 2);
             gPrevLeftIdx = left_idx;
         }
         if (gPrevRightIdx != right_idx)
         {
             DrawNeedle11(MID_BOT_CX, MID_BOT_CY, MID_R - 9, gPrevRightIdx, style->palette.panel_black, 2);
-            DrawGaugeTicks11(MID_BOT_CX, MID_BOT_CY, MID_R - 4, style->palette.text_primary, RGB565(140, 140, 145));
+            DrawGaugeTicks11(MID_BOT_CX, MID_BOT_CY, MID_R - 12, style->palette.text_primary, RGB565(140, 140, 145));
             DrawNeedle11(MID_BOT_CX, MID_BOT_CY, MID_R - 9, right_idx, style->palette.accent_red, 2);
             gPrevRightIdx = right_idx;
         }

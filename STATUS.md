@@ -42,3 +42,5 @@ State: initialized
 - Firmware rebuilt and reflashed after battery indicator addition.
 - Gauge hash marks and needle sweep paths now follow proper arc geometry (triangular sweep removed).
 - Firmware rebuilt and reflashed after arc LUT update.
+- Gauge hashmark dots now render inside the circular lines (inward radius offset applied).
+- Firmware rebuilt and reflashed after tick-radius adjustment.

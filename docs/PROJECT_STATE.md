@@ -167,3 +167,8 @@ Project: `EdgeAI_EV_Charger_Monitor_demo_NXP_FRDM-MCXN947`
   - `DrawGaugeTicks11`, `DrawGaugeTicks13`
   - `DrawNeedle11`, `DrawNeedle13`
 - Rebuilt and flashed successfully to FRDM-MCXN947.
+
+## Update 2026-02-15
+- Moved gauge hashmark dots inward so they render inside the circular rings instead of on the ring edge.
+- Updated tick redraw radii in `src/gauge_render.c` for static and dynamic tick redraw paths.
+- Rebuilt and flashed successfully to FRDM-MCXN947.
