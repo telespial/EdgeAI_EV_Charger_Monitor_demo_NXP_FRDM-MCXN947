@@ -116,13 +116,13 @@ static void DrawRing(int32_t cx, int32_t cy, int32_t r_outer, int32_t thickness,
 
 static void DrawGaugeTicks11(int32_t cx, int32_t cy, int32_t radius, uint16_t major_color, uint16_t minor_color)
 {
-    static const int8_t dx_lut[11] = {-39, -35, -27, -17, -7, 0, 7, 17, 27, 35, 39};
-    static const int8_t dy_lut[11] = {13, -3, -16, -27, -35, -39, -35, -27, -16, -3, 13};
+    static const int8_t dx_lut[11] = {-94, -83, -67, -47, -24, 0, 24, 47, 67, 83, 94};
+    static const int8_t dy_lut[11] = {-34, -56, -74, -88, -97, -100, -97, -88, -74, -56, -34};
     int32_t i;
     for (i = 0; i < 11; i++)
     {
-        int32_t x = cx + (dx_lut[i] * radius) / 47;
-        int32_t y = cy + (dy_lut[i] * radius) / 47;
+        int32_t x = cx + (dx_lut[i] * radius) / 100;
+        int32_t y = cy + (dy_lut[i] * radius) / 100;
         uint16_t c = ((i % 2) == 0) ? major_color : minor_color;
         par_lcd_s035_fill_rect(x - 1, y - 1, x + 1, y + 1, c);
     }
@@ -130,13 +130,13 @@ static void DrawGaugeTicks11(int32_t cx, int32_t cy, int32_t radius, uint16_t ma
 
 static void DrawGaugeTicks13(int32_t cx, int32_t cy, int32_t radius, uint16_t major_color, uint16_t minor_color)
 {
-    static const int8_t dx_lut[13] = {-66, -62, -56, -46, -34, -20, -7, 7, 20, 34, 46, 56, 62};
-    static const int8_t dy_lut[13] = {20, 2, -16, -33, -46, -56, -62, -62, -56, -46, -33, -16, 2};
+    static const int8_t dx_lut[13] = {-94, -85, -73, -57, -40, -20, 0, 20, 40, 57, 73, 85, 94};
+    static const int8_t dy_lut[13] = {-34, -52, -69, -82, -92, -98, -100, -98, -92, -82, -69, -52, -34};
     int32_t i;
     for (i = 0; i < 13; i++)
     {
-        int32_t x = cx + (dx_lut[i] * radius) / 76;
-        int32_t y = cy + (dy_lut[i] * radius) / 76;
+        int32_t x = cx + (dx_lut[i] * radius) / 100;
+        int32_t y = cy + (dy_lut[i] * radius) / 100;
         uint16_t c = ((i % 2) == 0) ? major_color : minor_color;
         par_lcd_s035_fill_rect(x - 1, y - 1, x + 1, y + 1, c);
     }
@@ -144,28 +144,28 @@ static void DrawGaugeTicks13(int32_t cx, int32_t cy, int32_t radius, uint16_t ma
 
 static void DrawNeedle11(int32_t cx, int32_t cy, int32_t radius, int32_t idx, uint16_t color, int32_t width)
 {
-    static const int8_t dx_lut[11] = {-35, -31, -24, -15, -6, 0, 6, 15, 24, 31, 35};
-    static const int8_t dy_lut[11] = {11, -2, -14, -23, -30, -34, -30, -23, -14, -2, 11};
+    static const int8_t dx_lut[11] = {-94, -83, -67, -47, -24, 0, 24, 47, 67, 83, 94};
+    static const int8_t dy_lut[11] = {-34, -56, -74, -88, -97, -100, -97, -88, -74, -56, -34};
     int32_t x1;
     int32_t y1;
 
     idx = ClampI32(idx, 0, 10);
-    x1 = cx + (dx_lut[idx] * radius) / 47;
-    y1 = cy + (dy_lut[idx] * radius) / 47;
+    x1 = cx + (dx_lut[idx] * radius) / 100;
+    y1 = cy + (dy_lut[idx] * radius) / 100;
     DrawLine(cx, cy, x1, y1, width, color);
     par_lcd_s035_draw_filled_circle(cx, cy, 4, color);
 }
 
 static void DrawNeedle13(int32_t cx, int32_t cy, int32_t radius, int32_t idx, uint16_t color, int32_t width)
 {
-    static const int8_t dx_lut[13] = {-58, -54, -48, -39, -28, -17, -6, 6, 17, 28, 39, 48, 54};
-    static const int8_t dy_lut[13] = {18, 1, -15, -29, -42, -51, -56, -56, -51, -42, -29, -15, 1};
+    static const int8_t dx_lut[13] = {-94, -85, -73, -57, -40, -20, 0, 20, 40, 57, 73, 85, 94};
+    static const int8_t dy_lut[13] = {-34, -52, -69, -82, -92, -98, -100, -98, -92, -82, -69, -52, -34};
     int32_t x1;
     int32_t y1;
 
     idx = ClampI32(idx, 0, 12);
-    x1 = cx + (dx_lut[idx] * radius) / 76;
-    y1 = cy + (dy_lut[idx] * radius) / 76;
+    x1 = cx + (dx_lut[idx] * radius) / 100;
+    y1 = cy + (dy_lut[idx] * radius) / 100;
     DrawLine(cx, cy, x1, y1, width, color);
     par_lcd_s035_draw_filled_circle(cx, cy, 5, color);
 }

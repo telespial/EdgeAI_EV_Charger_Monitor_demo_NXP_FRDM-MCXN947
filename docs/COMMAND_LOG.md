@@ -76,3 +76,7 @@ Format:
 - 2026-02-14 17:26:26 | source tools/mcux_env.sh + install_mcux_overlay.sh + west build | compile battery indicator update
 - 2026-02-14 17:26:26 | WS_DIR=... BUILD_DIR=... ./tools/flash_frdmmcxn947.sh | flash battery indicator update to FRDM-MCXN947
 - 2026-02-14 17:26:26 | update docs/PROJECT_STATE.md STATUS.md docs/COMMAND_LOG.md | record battery-indicator feature
+- 2026-02-14 17:27:58 | patch src/gauge_render.c LUTs | correct gauge hash marks/needle paths to circular arcs
+- 2026-02-14 17:27:58 | source tools/mcux_env.sh + install_mcux_overlay.sh + west build | compile gauge arc geometry fix
+- 2026-02-14 17:27:58 | WS_DIR=... BUILD_DIR=... ./tools/flash_frdmmcxn947.sh | flash gauge arc geometry fix
+- 2026-02-14 17:27:58 | update docs/PROJECT_STATE.md STATUS.md docs/COMMAND_LOG.md | record arc-geometry correction

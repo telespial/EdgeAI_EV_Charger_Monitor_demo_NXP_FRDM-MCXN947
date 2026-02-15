@@ -40,3 +40,5 @@ State: initialized
 - Firmware rebuilt and reflashed after global-center text alignment update.
 - Added battery charging level indicator above the main gauge, driven by SOC.
 - Firmware rebuilt and reflashed after battery indicator addition.
+- Gauge hash marks and needle sweep paths now follow proper arc geometry (triangular sweep removed).
+- Firmware rebuilt and reflashed after arc LUT update.
