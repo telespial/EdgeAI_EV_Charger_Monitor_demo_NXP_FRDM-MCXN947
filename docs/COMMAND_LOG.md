@@ -64,3 +64,7 @@ Format:
 - 2026-02-14 17:18:56 | source tools/mcux_env.sh + install_mcux_overlay.sh + west build | compile dashboard text update
 - 2026-02-14 17:18:56 | WS_DIR=... BUILD_DIR=... ./tools/flash_frdmmcxn947.sh | flash text update to FRDM-MCXN947
 - 2026-02-14 17:18:56 | update docs/PROJECT_STATE.md STATUS.md docs/COMMAND_LOG.md | record text branding changes
+- 2026-02-14 17:21:09 | patch src/gauge_render.c constants | move small gauge from third segment to first segment with other small gauge
+- 2026-02-14 17:21:09 | source tools/mcux_env.sh + install_mcux_overlay.sh + west build | compile gauge relocation update
+- 2026-02-14 17:21:09 | WS_DIR=... BUILD_DIR=... ./tools/flash_frdmmcxn947.sh | flash small-gauge relocation update
+- 2026-02-14 17:21:09 | update docs/PROJECT_STATE.md STATUS.md docs/COMMAND_LOG.md | record small-gauge segment change

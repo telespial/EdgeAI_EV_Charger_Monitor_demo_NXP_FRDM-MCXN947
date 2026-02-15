@@ -34,3 +34,5 @@ State: initialized
 - Firmware rebuilt and reflashed after gauge style update.
 - Dashboard text updated: bottom large yellow `NXP EDGEAI`, center `EV AI` removed, top header changed to `(c)RICHARD HABERKERN`.
 - Firmware rebuilt and reflashed after text update.
+- Moved right-side small gauge into the first section so both small gauges are now grouped together in the left segment.
+- Firmware rebuilt and reflashed after gauge relocation.

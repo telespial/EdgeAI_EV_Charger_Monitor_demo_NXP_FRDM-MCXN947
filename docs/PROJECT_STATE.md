@@ -141,3 +141,10 @@ Project: `EdgeAI_EV_Charger_Monitor_demo_NXP_FRDM-MCXN947`
   - added large yellow `NXP EDGEAI` text at bottom
   - replaced top header text with smaller `(c)RICHARD HABERKERN`
 - Rebuilt and flashed successfully to FRDM-MCXN947.
+
+## Update 2026-02-15
+- Moved the small power gauge from the third segment into the first segment, stacked with the other small gauge.
+- Updated gauge center constants in `src/gauge_render.c`:
+  - `MID_TOP` at left-top region
+  - `MID_BOT` at left-bottom region
+- Rebuilt and flashed successfully to FRDM-MCXN947.
