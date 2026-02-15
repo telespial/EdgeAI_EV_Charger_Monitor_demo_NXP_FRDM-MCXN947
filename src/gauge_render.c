@@ -302,9 +302,9 @@ static void DrawStaticDashboard(const gauge_style_preset_t *style)
 
     DrawLine(22, 78, 56, 78, 1, style->palette.text_primary);
     DrawLine(56, 78, 56, 258, 1, style->palette.text_primary);
-    DrawLine(56, 258, 132, 258, 1, style->palette.text_primary);
+    DrawLine(56, 258, 74, 258, 1, style->palette.text_primary);
     DrawLine(56, 258, 56, 288, 1, style->palette.text_primary);
-    DrawLine(56, 288, 132, 288, 1, style->palette.text_primary);
+    DrawLine(56, 288, 80, 288, 1, style->palette.text_primary);
     DrawLine(448, 78, 414, 78, 1, style->palette.text_primary);
     DrawLine(414, 78, 414, 258, 1, style->palette.text_primary);
     DrawLine(414, 258, 338, 258, 1, style->palette.text_primary);

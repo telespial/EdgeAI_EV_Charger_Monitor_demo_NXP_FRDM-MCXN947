@@ -100,3 +100,7 @@ Format:
 - 2026-02-14 17:35:34 | source tools/mcux_env.sh + install_mcux_overlay.sh + west build | compile gauge spacing/label alignment update
 - 2026-02-14 17:35:34 | WS_DIR=... BUILD_DIR=... ./tools/flash_frdmmcxn947.sh | flash spacing/label alignment update
 - 2026-02-14 17:35:34 | update docs/PROJECT_STATE.md STATUS.md docs/COMMAND_LOG.md | record gauge spacing and label updates
+- 2026-02-14 17:37:09 | patch src/gauge_render.c guide lines | shorten lower-left horizontal lines to avoid POWER text overlap
+- 2026-02-14 17:37:09 | source tools/mcux_env.sh + install_mcux_overlay.sh + west build | compile guide-line length adjustment
+- 2026-02-14 17:37:09 | WS_DIR=... BUILD_DIR=... ./tools/flash_frdmmcxn947.sh | flash guide-line length adjustment
+- 2026-02-14 17:37:09 | update docs/PROJECT_STATE.md STATUS.md docs/COMMAND_LOG.md | record guide-line overlap fix

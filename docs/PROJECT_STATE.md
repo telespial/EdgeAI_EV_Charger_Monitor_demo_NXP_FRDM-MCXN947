@@ -196,3 +196,7 @@ Project: `EdgeAI_EV_Charger_Monitor_demo_NXP_FRDM-MCXN947`
   - `POWER` label moved below the lower small gauge
   - increased spacing between the two small gauges and reduced their radius for cleaner separation
 - Rebuilt and flashed successfully to FRDM-MCXN947.
+
+## Update 2026-02-15
+- Shortened lower-left guide lines so they no longer overlay the `POWER` text or intrude into the lower gauge area.
+- Rebuilt and flashed successfully to FRDM-MCXN947.
