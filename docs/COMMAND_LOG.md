@@ -330,3 +330,6 @@ Format:
 - 2026-02-15 17:02:04 | create failsafe package from mcuxsdk_ws/mcuxsdk_ws/build_anomaly/edgeai_ev_charger_monitor_demo_cm33_core0.bin | created `GOLDEN_20260215_170204` as final golden + failsafe checkpoint
 - 2026-02-15 17:02:04 | update docs/RESTORE_POINTS.md + docs/failsafe.md | set active restore target to `edgeai_ev_charger_anomaly_demo_cm33_core0_GOLDEN_20260215_170204.bin`
 - 2026-02-17 08:58:51 | package failsafe binary + update restore docs | set GOLDEN_20260217_085851 as active golden and failsafe baseline
+- 2026-02-22 07:52:33 | inspect EV charger repo tracking/ignore/docs state before AGENTS hide operation
+- 2026-02-22 07:52:42 | update .gitignore + git rm --cached AGENTS.md | hide AGENTS instructions from GitHub while keeping local file
+- 2026-02-22 07:53:00 | update docs/PROJECT_STATE.md | recorded AGENTS ignore/untrack repo-hygiene change

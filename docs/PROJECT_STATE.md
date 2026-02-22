@@ -1,7 +1,14 @@
 # Project State
 
-Last updated: 2026-02-15
+Last updated: 2026-02-22
 Project: `EdgeAI_EV_Charger_Anomaly_demo_NXP_FRDM-MCXN947`
+
+## Update 2026-02-22 (Repo Hygiene: Hide Local Agent Instructions)
+- Removed `AGENTS.md` from git tracking (`git rm --cached AGENTS.md`) while preserving local file content on disk.
+- Added ignore rules in `.gitignore`:
+  - `AGENTS.md`
+  - `agents.md`
+- Result: local agent-instruction files are no longer published to GitHub for this project repo.
 
 ## Current Baseline
 - Final golden/failsafe ID: `GOLDEN_20260215_170204`

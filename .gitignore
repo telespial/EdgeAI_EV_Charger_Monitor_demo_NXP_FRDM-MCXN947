@@ -10,3 +10,7 @@ __pycache__/
 
 # Capture logs
 captures/
+
+# Local agent instructions (keep local, do not publish)
+AGENTS.md
+agents.md
